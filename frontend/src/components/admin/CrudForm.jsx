@@ -153,7 +153,7 @@ export default function CrudForm({
                     placeholder="Masukkan nama beasiswa"
                   />
                 </div>
- 
+
                 {/* Category & Provider */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -213,7 +213,7 @@ export default function CrudForm({
                     placeholder="Masukkan deskripsi beasiswa"
                   />
                 </div>
- 
+
                 {/* Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -245,7 +245,7 @@ export default function CrudForm({
                     />
                   </div>
                 </div>
- 
+
                 {/* Registration URL */}
                 <div>
                   <label htmlFor="url_pendaftaran" className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
@@ -313,7 +313,7 @@ export default function CrudForm({
                       />
                     </div>
                   </div>
- 
+
                   <div>
                     <label htmlFor="dokumen_persyaratan" className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
                       Dokumen Persyaratan

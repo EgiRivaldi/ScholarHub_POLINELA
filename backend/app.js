@@ -18,8 +18,18 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
+// Enable trust proxy for secure cookies behind reverse proxies (like Render)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // CORS configuration
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [])
+];
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -45,9 +55,9 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true if using HTTPS
+      secure: process.env.NODE_ENV === 'production', // Set to true if using HTTPS
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     },
   })
 );
