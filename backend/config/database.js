@@ -20,7 +20,7 @@ const testConnection = async () => {
     logger.info('Database connected successfully');
     return true;
   } catch (error) {
-    logger.error(`Database connection failed: ${error.message}`);
+    logger.error(`Database connection failed: ${error.stack || error.message || error}`);
     return false;
   }
 };
