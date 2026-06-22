@@ -1,6 +1,8 @@
 const mysql = require('mysql2/promise');
 const logger = require('../utils/logger');
 
+logger.info('Env keys check: ' + Object.keys(process.env).filter(k => k.startsWith('DB_') || k === 'NODE_ENV' || k === 'PORT').join(', '));
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT, 10) || 3306,
