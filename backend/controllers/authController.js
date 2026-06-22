@@ -1,7 +1,11 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const adminModel = require('../models/adminModel');
 const { successResponse, errorResponse } = require('../utils/responseHelper');
 const logger = require('../utils/logger');
+
+const JWT_SECRET = process.env.SESSION_SECRET || 'scholarhub-polinela-default-secret-key-2026';
+const JWT_EXPIRES_IN = '24h';
 
 const authController = {
   login: async (req, res) => {
@@ -24,15 +28,17 @@ const authController = {
         return errorResponse(res, 'Invalid username or password', [], 401);
       }
 
-      // Store in session (exclude password)
-      req.session.admin = {
+      const adminData = {
         id: admin.id,
         username: admin.username,
         nama_lengkap: admin.nama_lengkap,
       };
 
+      // Generate JWT token
+      const token = jwt.sign(adminData, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
       logger.info(`Admin logged in successfully: ${username}`);
-      return successResponse(res, 'Login successful', req.session.admin);
+      return successResponse(res, 'Login successful', { ...adminData, token });
     } catch (error) {
       logger.error(`Login error: ${error.message}`);
       return errorResponse(res, 'An error occurred during login', [error.message], 500);
@@ -40,27 +46,29 @@ const authController = {
   },
 
   logout: async (req, res) => {
-    if (!req.session || !req.session.admin) {
-      return errorResponse(res, 'No active session found', [], 400);
-    }
-
-    const username = req.session.admin.username;
-    req.session.destroy((err) => {
-      if (err) {
-        logger.error(`Logout failed for ${username}: ${err.message}`);
-        return errorResponse(res, 'Failed to logout', [err.message], 500);
-      }
-      res.clearCookie('connect.sid'); // Clear session cookie
-      logger.info(`Admin logged out successfully: ${username}`);
-      return successResponse(res, 'Logout successful');
-    });
+    // With JWT, logout is handled client-side by removing the token
+    logger.info('Admin logged out (token-based)');
+    return successResponse(res, 'Logout successful');
   },
 
   checkSession: async (req, res) => {
-    if (req.session && req.session.admin) {
-      return successResponse(res, 'Active session found', req.session.admin);
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return errorResponse(res, 'No active session', [], 401);
+      }
+
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, JWT_SECRET);
+
+      return successResponse(res, 'Active session found', {
+        id: decoded.id,
+        username: decoded.username,
+        nama_lengkap: decoded.nama_lengkap,
+      });
+    } catch (error) {
+      return errorResponse(res, 'No active session', [], 401);
     }
-    return errorResponse(res, 'No active session', [], 401);
   },
 };
 

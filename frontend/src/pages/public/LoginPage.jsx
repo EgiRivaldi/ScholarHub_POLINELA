@@ -31,6 +31,9 @@ export default function LoginPage() {
         localStorage.setItem('admin_logged_in', 'true');
         if (response.data) {
           localStorage.setItem('admin', JSON.stringify(response.data));
+          if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+          }
         }
         toast.success('Masuk berhasil!');
         navigate('/admin');

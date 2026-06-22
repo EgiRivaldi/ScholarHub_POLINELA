@@ -31,12 +31,14 @@ export default function AdminLayout() {
         if (!user) {
           localStorage.removeItem('admin_logged_in');
           localStorage.removeItem('admin');
+          localStorage.removeItem('token');
           navigate('/login');
         }
       })
       .catch(() => {
         localStorage.removeItem('admin_logged_in');
         localStorage.removeItem('admin');
+        localStorage.removeItem('token');
         navigate('/login');
       });
   }, [navigate, location.pathname]);
