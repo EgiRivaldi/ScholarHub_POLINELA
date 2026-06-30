@@ -1,58 +1,97 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/database');
 
-const requirementModel = {
+const Requirement = {
   findAll: async () => {
-    const sql = `
-      SELECT s.*, i.nama_beasiswa 
-      FROM syarat_beasiswa s 
-      LEFT JOIN informasi_beasiswa i ON s.beasiswa_id = i.id 
-      ORDER BY s.id DESC
-    `;
-    const [rows] = await pool.query(sql);
-    return rows;
+    const { data, error } = await supabase
+      .from('syarat_beasiswa')
+      .select(`
+        *,
+        informasi_beasiswa (judul)
+      `)
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    
+    // Map hasilnya agar field `judul_beasiswa` ada
+    return data.map(item => ({
+      ...item,
+      judul_beasiswa: item.informasi_beasiswa?.judul
+    }));
+  },
+
+  findByScholarshipId: async (beasiswa_id) => {
+    const { data, error } = await supabase
+      .from('syarat_beasiswa')
+      .select('*')
+      .eq('beasiswa_id', beasiswa_id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
   findById: async (id) => {
-    const [rows] = await pool.query('SELECT * FROM syarat_beasiswa WHERE id = ?', [id]);
-    return rows[0] || null;
+    const { data, error } = await supabase
+      .from('syarat_beasiswa')
+      .select(`
+        *,
+        informasi_beasiswa (judul)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    
+    if (data) {
+      data.judul_beasiswa = data.informasi_beasiswa?.judul;
+    }
+    return data;
   },
 
-  findByScholarshipId: async (scholarshipId) => {
-    const [rows] = await pool.query('SELECT * FROM syarat_beasiswa WHERE beasiswa_id = ?', [scholarshipId]);
-    return rows[0] || null;
+  create: async (requirementData) => {
+    const { data, error } = await supabase
+      .from('syarat_beasiswa')
+      .insert([
+        {
+          beasiswa_id: requirementData.beasiswa_id,
+          syarat_dokumen: requirementData.syarat_dokumen,
+          ipk_minimal: requirementData.ipk_minimal,
+          syarat_lainnya: requirementData.syarat_lainnya
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
   },
 
-  create: async ({ beasiswa_id, ipk_minimum, semester_minimum, dokumen_persyaratan }) => {
-    const [result] = await pool.query(
-      'INSERT INTO syarat_beasiswa (beasiswa_id, ipk_minimum, semester_minimum, dokumen_persyaratan) VALUES (?, ?, ?, ?)',
-      [
-        beasiswa_id,
-        ipk_minimum !== undefined && ipk_minimum !== null && ipk_minimum !== '' ? parseFloat(ipk_minimum) : 0.00,
-        semester_minimum !== undefined && semester_minimum !== null && semester_minimum !== '' ? parseInt(semester_minimum, 10) : 1,
-        dokumen_persyaratan || null
-      ]
-    );
-    return result.insertId;
-  },
+  update: async (id, requirementData) => {
+    const { data, error } = await supabase
+      .from('syarat_beasiswa')
+      .update({
+        beasiswa_id: requirementData.beasiswa_id,
+        syarat_dokumen: requirementData.syarat_dokumen,
+        ipk_minimal: requirementData.ipk_minimal,
+        syarat_lainnya: requirementData.syarat_lainnya
+      })
+      .eq('id', id)
+      .select();
 
-  update: async (id, { beasiswa_id, ipk_minimum, semester_minimum, dokumen_persyaratan }) => {
-    const [result] = await pool.query(
-      'UPDATE syarat_beasiswa SET beasiswa_id = ?, ipk_minimum = ?, semester_minimum = ?, dokumen_persyaratan = ? WHERE id = ?',
-      [
-        beasiswa_id,
-        ipk_minimum !== undefined && ipk_minimum !== null && ipk_minimum !== '' ? parseFloat(ipk_minimum) : 0.00,
-        semester_minimum !== undefined && semester_minimum !== null && semester_minimum !== '' ? parseInt(semester_minimum, 10) : 1,
-        dokumen_persyaratan || null,
-        id
-      ]
-    );
-    return result.affectedRows > 0;
+    if (error) throw error;
+    return data.length > 0 ? 1 : 0;
   },
 
   delete: async (id) => {
-    const [result] = await pool.query('DELETE FROM syarat_beasiswa WHERE id = ?', [id]);
-    return result.affectedRows > 0;
-  },
+    const { data, error } = await supabase
+      .from('syarat_beasiswa')
+      .delete()
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return data.length > 0 ? 1 : 0;
+  }
 };
 
-module.exports = requirementModel;
+module.exports = Requirement;

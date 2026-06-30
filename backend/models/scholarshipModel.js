@@ -1,137 +1,172 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/database');
 
-const scholarshipModel = {
+const Scholarship = {
   findAll: async (filters = {}) => {
-    let sql = `
-      SELECT i.*, k.nama_kategori, p.nama_penyedia, p.singkatan as penyedia_singkatan,
-             CASE WHEN i.tanggal_tutup >= CURDATE() THEN 'active' ELSE 'closed' END as status
-      FROM informasi_beasiswa i
-      LEFT JOIN kategori_beasiswa k ON i.kategori_id = k.id
-      LEFT JOIN penyedia_beasiswa p ON i.penyedia_id = p.id
-    `;
-
-    const whereClauses = [];
-    const queryParams = [];
+    let query = supabase
+      .from('informasi_beasiswa')
+      .select(`
+        *,
+        kategori_beasiswa (nama_kategori),
+        penyedia_beasiswa (nama_penyedia, singkatan)
+      `);
 
     if (filters.search) {
-      whereClauses.push('(i.nama_beasiswa LIKE ? OR i.deskripsi LIKE ? OR p.nama_penyedia LIKE ? OR p.singkatan LIKE ?)');
-      const searchVal = `%${filters.search}%`;
-      queryParams.push(searchVal, searchVal, searchVal, searchVal);
+      const searchPattern = `%${filters.search}%`;
+      // We can't directly search relations easily in a single OR across main and joined tables without RPC or Views.
+      // So we will search on main table fields.
+      query = query.or(`nama_beasiswa.ilike.${searchPattern},deskripsi.ilike.${searchPattern}`);
     }
 
     if (filters.kategori_id) {
-      whereClauses.push('i.kategori_id = ?');
-      queryParams.push(parseInt(filters.kategori_id, 10));
+      query = query.eq('kategori_id', filters.kategori_id);
     }
 
     if (filters.status) {
+      const today = new Date().toISOString().split('T')[0];
       if (filters.status === 'active') {
-        whereClauses.push('i.tanggal_tutup >= CURDATE()');
+        query = query.gte('tanggal_tutup', today);
       } else if (filters.status === 'closed') {
-        whereClauses.push('i.tanggal_tutup < CURDATE()');
+        query = query.lt('tanggal_tutup', today);
       }
-    }
-
-    if (whereClauses.length > 0) {
-      sql += ` WHERE ${whereClauses.join(' AND ')}`;
     }
 
     const allowedSortFields = ['id', 'nama_beasiswa', 'tanggal_buka', 'tanggal_tutup', 'created_at'];
-    const sort = allowedSortFields.includes(filters.sort) ? filters.sort : 'id';
-    const order = filters.order === 'ASC' ? 'ASC' : 'DESC';
-    sql += ` ORDER BY i.${sort} ${order}`;
+    const sortField = allowedSortFields.includes(filters.sort) ? filters.sort : 'id';
+    const isAscending = filters.order === 'ASC';
+    
+    query = query.order(sortField, { ascending: isAscending });
 
     const page = parseInt(filters.page, 10) || 1;
     const limit = parseInt(filters.limit, 10) || 10;
-    const offset = (page - 1) * limit;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
-    sql += ` LIMIT ? OFFSET ?`;
-    queryParams.push(limit, offset);
+    query = query.range(from, to);
 
-    const [rows] = await pool.query(sql, queryParams);
-    return rows;
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
+    return data.map(item => {
+      const tutupDate = new Date(item.tanggal_tutup);
+      tutupDate.setHours(0,0,0,0);
+      
+      return {
+        ...item,
+        nama_kategori: item.kategori_beasiswa?.nama_kategori,
+        nama_penyedia: item.penyedia_beasiswa?.nama_penyedia,
+        penyedia_singkatan: item.penyedia_beasiswa?.singkatan,
+        status: tutupDate >= todayDate ? 'active' : 'closed',
+        // cleanup relational objects
+        kategori_beasiswa: undefined,
+        penyedia_beasiswa: undefined
+      };
+    });
   },
 
   count: async (filters = {}) => {
-    let sql = `
-      SELECT COUNT(*) as total
-      FROM informasi_beasiswa i
-      LEFT JOIN kategori_beasiswa k ON i.kategori_id = k.id
-      LEFT JOIN penyedia_beasiswa p ON i.penyedia_id = p.id
-    `;
-
-    const whereClauses = [];
-    const queryParams = [];
+    let query = supabase
+      .from('informasi_beasiswa')
+      .select('*', { count: 'exact', head: true });
 
     if (filters.search) {
-      whereClauses.push('(i.nama_beasiswa LIKE ? OR i.deskripsi LIKE ? OR p.nama_penyedia LIKE ? OR p.singkatan LIKE ?)');
-      const searchVal = `%${filters.search}%`;
-      queryParams.push(searchVal, searchVal, searchVal, searchVal);
+      const searchPattern = `%${filters.search}%`;
+      query = query.or(`nama_beasiswa.ilike.${searchPattern},deskripsi.ilike.${searchPattern}`);
     }
 
     if (filters.kategori_id) {
-      whereClauses.push('i.kategori_id = ?');
-      queryParams.push(parseInt(filters.kategori_id, 10));
+      query = query.eq('kategori_id', filters.kategori_id);
     }
 
     if (filters.status) {
+      const today = new Date().toISOString().split('T')[0];
       if (filters.status === 'active') {
-        whereClauses.push('i.tanggal_tutup >= CURDATE()');
+        query = query.gte('tanggal_tutup', today);
       } else if (filters.status === 'closed') {
-        whereClauses.push('i.tanggal_tutup < CURDATE()');
+        query = query.lt('tanggal_tutup', today);
       }
     }
 
-    if (whereClauses.length > 0) {
-      sql += ` WHERE ${whereClauses.join(' AND ')}`;
-    }
-
-    const [rows] = await pool.query(sql, queryParams);
-    return rows[0].total;
+    const { count, error } = await query;
+    if (error) throw error;
+    return count || 0;
   },
 
   findById: async (id) => {
-    const sql = `
-      SELECT i.*, k.nama_kategori, p.nama_penyedia, p.singkatan as penyedia_singkatan,
-             CASE WHEN i.tanggal_tutup >= CURDATE() THEN 'active' ELSE 'closed' END as status
-      FROM informasi_beasiswa i
-      LEFT JOIN kategori_beasiswa k ON i.kategori_id = k.id
-      LEFT JOIN penyedia_beasiswa p ON i.penyedia_id = p.id
-      WHERE i.id = ?
-    `;
-    const [rows] = await pool.query(sql, [id]);
-    return rows[0] || null;
+    const { data, error } = await supabase
+      .from('informasi_beasiswa')
+      .select(`
+        *,
+        kategori_beasiswa (nama_kategori),
+        penyedia_beasiswa (nama_penyedia, singkatan)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    if (!data) return null;
+
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    const tutupDate = new Date(data.tanggal_tutup);
+    tutupDate.setHours(0,0,0,0);
+
+    return {
+      ...data,
+      nama_kategori: data.kategori_beasiswa?.nama_kategori,
+      nama_penyedia: data.penyedia_beasiswa?.nama_penyedia,
+      penyedia_singkatan: data.penyedia_beasiswa?.singkatan,
+      status: tutupDate >= todayDate ? 'active' : 'closed',
+      kategori_beasiswa: undefined,
+      penyedia_beasiswa: undefined
+    };
   },
 
-  create: async ({ nama_beasiswa, deskripsi, gambar, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id }) => {
-    const [result] = await pool.query(
-      `INSERT INTO informasi_beasiswa 
-       (nama_beasiswa, deskripsi, gambar, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nama_beasiswa, deskripsi, gambar, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id]
-    );
-    return result.insertId;
+  create: async (dataToInsert) => {
+    const { data, error } = await supabase
+      .from('informasi_beasiswa')
+      .insert([dataToInsert])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
   },
 
-  update: async (id, { nama_beasiswa, deskripsi, gambar, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id }) => {
-    const [result] = await pool.query(
-      `UPDATE informasi_beasiswa 
-       SET nama_beasiswa = ?, deskripsi = ?, gambar = ?, tanggal_buka = ?, tanggal_tutup = ?, url_pendaftaran = ?, kategori_id = ?, penyedia_id = ?
-       WHERE id = ?`,
-      [nama_beasiswa, deskripsi, gambar, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id, id]
-    );
-    return result.affectedRows > 0;
+  update: async (id, dataToUpdate) => {
+    const { data, error } = await supabase
+      .from('informasi_beasiswa')
+      .update(dataToUpdate)
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return data.length > 0;
   },
 
   delete: async (id) => {
-    const [result] = await pool.query('DELETE FROM informasi_beasiswa WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+    const { data, error } = await supabase
+      .from('informasi_beasiswa')
+      .delete()
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return data.length > 0;
   },
 
   countActive: async () => {
-    const [rows] = await pool.query('SELECT COUNT(*) as total FROM informasi_beasiswa WHERE tanggal_tutup >= CURDATE()');
-    return rows[0].total;
+    const today = new Date().toISOString().split('T')[0];
+    const { count, error } = await supabase
+      .from('informasi_beasiswa')
+      .select('*', { count: 'exact', head: true })
+      .gte('tanggal_tutup', today);
+
+    if (error) throw error;
+    return count || 0;
   },
 };
 
-module.exports = scholarshipModel;
+module.exports = Scholarship;

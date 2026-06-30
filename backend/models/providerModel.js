@@ -1,41 +1,83 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/database');
 
-const providerModel = {
+const Provider = {
   findAll: async () => {
-    const [rows] = await pool.query('SELECT * FROM penyedia_beasiswa ORDER BY id DESC');
-    return rows;
+    // Dengan Supabase kita bisa hitung total beasiswa per penyedia
+    const { data, error } = await supabase
+      .from('penyedia_beasiswa')
+      .select(`
+        *,
+        informasi_beasiswa (count)
+      `)
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    
+    return data.map(item => ({
+      ...item,
+      total_beasiswa: item.informasi_beasiswa[0].count
+    }));
   },
 
   findById: async (id) => {
-    const [rows] = await pool.query('SELECT * FROM penyedia_beasiswa WHERE id = ?', [id]);
-    return rows[0] || null;
+    const { data, error } = await supabase
+      .from('penyedia_beasiswa')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
-  create: async ({ nama_penyedia, singkatan, website, logo }) => {
-    const [result] = await pool.query(
-      'INSERT INTO penyedia_beasiswa (nama_penyedia, singkatan, website, logo) VALUES (?, ?, ?, ?)',
-      [nama_penyedia, singkatan, website, logo]
-    );
-    return result.insertId;
+  create: async (providerData) => {
+    const { data, error } = await supabase
+      .from('penyedia_beasiswa')
+      .insert([
+        {
+          nama_penyedia: providerData.nama_penyedia,
+          jenis_penyedia: providerData.jenis_penyedia,
+          kontak: providerData.kontak,
+          website: providerData.website,
+          alamat: providerData.alamat,
+          logo: providerData.logo
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
   },
 
-  update: async (id, { nama_penyedia, singkatan, website, logo }) => {
-    const [result] = await pool.query(
-      'UPDATE penyedia_beasiswa SET nama_penyedia = ?, singkatan = ?, website = ?, logo = ? WHERE id = ?',
-      [nama_penyedia, singkatan, website, logo, id]
-    );
-    return result.affectedRows > 0;
+  update: async (id, providerData) => {
+    const { data, error } = await supabase
+      .from('penyedia_beasiswa')
+      .update({
+        nama_penyedia: providerData.nama_penyedia,
+        jenis_penyedia: providerData.jenis_penyedia,
+        kontak: providerData.kontak,
+        website: providerData.website,
+        alamat: providerData.alamat,
+        logo: providerData.logo
+      })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return data.length > 0 ? 1 : 0;
   },
 
   delete: async (id) => {
-    const [result] = await pool.query('DELETE FROM penyedia_beasiswa WHERE id = ?', [id]);
-    return result.affectedRows > 0;
-  },
+    const { data, error } = await supabase
+      .from('penyedia_beasiswa')
+      .delete()
+      .eq('id', id)
+      .select();
 
-  count: async () => {
-    const [rows] = await pool.query('SELECT COUNT(*) as total FROM penyedia_beasiswa');
-    return rows[0].total;
-  },
+    if (error) throw error;
+    return data.length > 0 ? 1 : 0;
+  }
 };
 
-module.exports = providerModel;
+module.exports = Provider;

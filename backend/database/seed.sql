@@ -1,43 +1,35 @@
-USE scholarhub_polinela;
+-- Seed Kategori Beasiswa
+INSERT INTO kategori_beasiswa (nama_kategori, deskripsi) VALUES
+('Pemerintah', 'Beasiswa yang diselenggarakan oleh instansi pemerintah (pusat/daerah).'),
+('Swasta', 'Beasiswa dari perusahaan atau yayasan swasta.'),
+('Internasional', 'Beasiswa untuk studi atau program di luar negeri.'),
+('BUMN', 'Beasiswa dari Badan Usaha Milik Negara.'),
+('Universitas', 'Beasiswa internal dari perguruan tinggi.')
+ON CONFLICT (nama_kategori) DO NOTHING;
 
--- 1. Insert Admin User
--- Password is 'password' hashed using bcrypt ($2b$10$yO0QO/O1.nQj0jV5pX8TluE5W3cTjK/jJ4hJgA2U2U.jV/o2Z6u0W)
-INSERT INTO users (username, password_hash, email, full_name, role) VALUES 
-('admin', '$2b$10$yO0QO/O1.nQj0jV5pX8TluE5W3cTjK/jJ4hJgA2U2U.jV/o2Z6u0W', 'admin@scholarhub.polinela.ac.id', 'Administrator Polinela', 'super_admin');
+-- Seed Penyedia Beasiswa
+INSERT INTO penyedia_beasiswa (nama_penyedia, singkatan, website, logo) VALUES
+('Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi', 'Kemdikbudristek', 'https://beasiswa.kemdikbud.go.id', 'kemdikbud_logo.png'),
+('Lembaga Pengelola Dana Pendidikan', 'LPDP', 'https://lpdp.kemenkeu.go.id', 'lpdp_logo.png'),
+('Djarum Foundation', 'Djarum', 'https://djarumbeasiswaplus.org', 'djarum_logo.png'),
+('Bank Indonesia', 'BI', 'https://www.bi.go.id', 'bi_logo.png'),
+('Politeknik Negeri Lampung', 'POLINELA', 'https://polinela.ac.id', 'polinela_logo.png')
+ON CONFLICT (nama_penyedia) DO NOTHING;
 
--- 2. Insert Categories
-INSERT INTO categories (name, slug, description, icon_name) VALUES 
-('Beasiswa Prestasi', 'beasiswa-prestasi', 'Beasiswa untuk mahasiswa dengan pencapaian akademik terbaik.', 'Trophy'),
-('Bantuan Pendidikan', 'bantuan-pendidikan', 'Bantuan biaya pendidikan untuk mahasiswa kurang mampu.', 'Wallet'),
-('Pertukaran Pelajar', 'pertukaran-pelajar', 'Program pertukaran pelajar ke luar negeri atau kampus lain.', 'Globe');
+-- Seed Informasi Beasiswa
+INSERT INTO informasi_beasiswa (nama_beasiswa, deskripsi, gambar, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id) VALUES
+('KIP Kuliah Merdeka', 'Bantuan biaya pendidikan bagi lulusan SMA/sederajat yang memiliki potensi akademik baik namun memiliki keterbatasan ekonomi.', 'kip_kuliah.jpg', '2024-02-01', '2025-05-30', 'https://kip-kuliah.kemdikbud.go.id', 1, 1),
+('Beasiswa Reguler LPDP', 'Beasiswa pascasarjana untuk Warga Negara Indonesia yang ingin melanjutkan studi S2/S3.', 'lpdp_reguler.jpg', '2024-01-11', '2024-02-12', 'https://beasiswalpdp.kemenkeu.go.id', 1, 2),
+('Djarum Beasiswa Plus', 'Program beasiswa berprestasi yang memberikan dana beasiswa dan berbagai macam pelatihan soft skills.', 'djarum_plus.jpg', '2024-03-27', '2025-05-30', 'https://djarumbeasiswaplus.org/pendaftaran', 2, 3),
+('Beasiswa Bank Indonesia', 'Beasiswa yang ditujukan untuk mahasiswa program sarjana (S1) dan vokasi (D3/D4).', 'beasiswa_bi.jpg', '2024-02-15', '2024-03-15', 'https://www.bi.go.id/id/institute/beasiswa/', 4, 4),
+('Beasiswa Prestasi POLINELA', 'Beasiswa internal untuk mahasiswa berprestasi Politeknik Negeri Lampung.', 'prestasi_polinela.jpg', '2024-08-01', '2025-08-31', 'https://bak.polinela.ac.id', 5, 5)
+ON CONFLICT (nama_beasiswa) DO NOTHING;
 
--- 3. Insert Providers
-INSERT INTO providers (name, description, website_url) VALUES 
-('Kementerian Pendidikan', 'Kementerian Pendidikan dan Kebudayaan Republik Indonesia', 'https://kemdikbud.go.id'),
-('Bank Indonesia', 'Bank Sentral Republik Indonesia', 'https://www.bi.go.id'),
-('Pemerintah Provinsi Lampung', 'Pemerintah daerah Provinsi Lampung', 'https://lampungprov.go.id');
-
--- 4. Insert Scholarships
-INSERT INTO scholarships (title, slug, provider_id, category_id, description, coverage, registration_link, status, open_date, deadline_date) VALUES 
-('Beasiswa KIP Kuliah 2026', 'beasiswa-kip-kuliah-2026', 1, 2, 'Program Bantuan Pendidikan bagi mahasiswa kurang mampu dengan potensi akademik.', 'Biaya Pendidikan & Biaya Hidup', 'https://kip-kuliah.kemdikbud.go.id', 'Open', '2026-06-01', '2026-08-31'),
-('Beasiswa Bank Indonesia 2026', 'beasiswa-bank-indonesia-2026', 2, 1, 'Beasiswa bergengsi dari BI untuk mahasiswa berprestasi dan aktif berorganisasi.', 'Biaya Pendidikan Rp 1.000.000 / bulan', 'https://www.bi.go.id', 'Open', '2026-06-15', '2026-07-20'),
-('Beasiswa Mahasiswa Lampung Berjaya', 'beasiswa-mahasiswa-lampung-berjaya', 3, 1, 'Dukungan pendidikan bagi mahasiswa ber-KTP Provinsi Lampung yang berkuliah di institusi negeri.', 'Bantuan Uang Tunai Rp 5.000.000 / semester', 'https://lampungprov.go.id', 'Upcoming', '2026-09-01', '2026-10-15');
-
--- 5. Insert Scholarship Requirements
--- For KIP Kuliah (scholarship_id = 1)
-INSERT INTO scholarship_requirements (scholarship_id, requirement_text, is_mandatory) VALUES 
-(1, 'Memiliki Kartu Indonesia Pintar (KIP) atau dari keluarga peserta PKH', TRUE),
-(1, 'Lulusan SMA/SMK tahun berjalan atau maksimal 2 tahun sebelumnya', TRUE),
-(1, 'Surat Keterangan Tidak Mampu (SKTM)', TRUE);
-
--- For Beasiswa BI (scholarship_id = 2)
-INSERT INTO scholarship_requirements (scholarship_id, requirement_text, is_mandatory) VALUES 
-(2, 'Minimal IPK 3.25 skala 4.00', TRUE),
-(2, 'Mahasiswa aktif semester 4 atau 6', TRUE),
-(2, 'Surat Rekomendasi dari Ketua Program Studi', TRUE),
-(2, 'Aktif dalam organisasi kemahasiswaan (GenBI)', FALSE);
-
--- For Beasiswa Lampung (scholarship_id = 3)
-INSERT INTO scholarship_requirements (scholarship_id, requirement_text, is_mandatory) VALUES 
-(3, 'Kartu Tanda Penduduk (KTP) Provinsi Lampung', TRUE),
-(3, 'Surat Keterangan Berkelakuan Baik dari Kampus', TRUE);
+-- Seed Syarat Beasiswa
+INSERT INTO syarat_beasiswa (beasiswa_id, ipk_minimum, semester_minimum, dokumen_persyaratan) VALUES
+(1, 0.00, 1, 'Kartu KIP/KKS, SKTM, KK, KTP, Rapor semester 1-6'),
+(2, 3.00, 1, 'Ijazah S1/S2, Transkrip nilai, Sertifikat TOEFL/IELTS, LoA Unconditional, Surat Rekomendasi'),
+(3, 3.20, 4, 'Transkrip nilai (min smt 3), KTP, KTM, Pas foto, Surat Keterangan Aktif Kuliah'),
+(4, 3.25, 3, 'Transkrip nilai, KTP, KTM, Pas foto, Surat Keterangan Aktif Kuliah, Motivation Letter'),
+(5, 3.50, 2, 'Transkrip nilai, Piagam/sertifikat penghargaan, KTM, KTP, Surat Rekomendasi')
+ON CONFLICT (beasiswa_id) DO NOTHING;

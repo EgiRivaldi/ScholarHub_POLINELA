@@ -1,72 +1,76 @@
--- Database Creation
-CREATE DATABASE IF NOT EXISTS scholarhub_polinela;
-USE scholarhub_polinela;
-
--- 1. `users` Table
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS akun_admin (
+    id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    nama_lengkap VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    full_name VARCHAR(100),
-    role ENUM('admin', 'super_admin') DEFAULT 'admin',
+    role VARCHAR(20) DEFAULT 'admin',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. `categories` Table
-CREATE TABLE IF NOT EXISTS categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    slug VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    icon_name VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 3. `providers` Table
-CREATE TABLE IF NOT EXISTS providers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    website_url VARCHAR(255),
-    logo_url VARCHAR(255),
+CREATE TABLE IF NOT EXISTS kategori_beasiswa (
+    id SERIAL PRIMARY KEY,
+    nama_kategori VARCHAR(100) NOT NULL,
+    deskripsi TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. `scholarships` Table
-CREATE TABLE IF NOT EXISTS scholarships (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    slug VARCHAR(200) NOT NULL UNIQUE,
-    provider_id INT NOT NULL,
-    category_id INT NOT NULL,
-    description TEXT NOT NULL,
-    coverage VARCHAR(255),
-    registration_link VARCHAR(255) NOT NULL,
-    status ENUM('Open', 'Closed', 'Upcoming') DEFAULT 'Upcoming',
-    open_date DATE,
-    deadline_date DATE,
+CREATE TABLE IF NOT EXISTS penyedia_beasiswa (
+    id SERIAL PRIMARY KEY,
+    nama_penyedia VARCHAR(150) NOT NULL,
+    jenis_penyedia VARCHAR(50) NOT NULL,
+    kontak VARCHAR(100),
+    website VARCHAR(255),
+    alamat TEXT,
+    logo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE RESTRICT,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. `scholarship_requirements` Table
-CREATE TABLE IF NOT EXISTS scholarship_requirements (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    scholarship_id INT NOT NULL,
-    requirement_text TEXT NOT NULL,
-    is_mandatory BOOLEAN DEFAULT TRUE,
+CREATE TABLE IF NOT EXISTS informasi_beasiswa (
+    id SERIAL PRIMARY KEY,
+    kategori_id INT NOT NULL,
+    penyedia_id INT NOT NULL,
+    judul VARCHAR(255) NOT NULL,
+    deskripsi TEXT NOT NULL,
+    jenjang_pendidikan VARCHAR(100) NOT NULL,
+    kuota INT,
+    tanggal_mulai DATE NOT NULL,
+    tanggal_selesai DATE NOT NULL,
+    status VARCHAR(20) DEFAULT 'aktif',
+    poster VARCHAR(255),
+    link_pendaftaran VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (kategori_id) REFERENCES kategori_beasiswa(id) ON DELETE CASCADE,
+    FOREIGN KEY (penyedia_id) REFERENCES penyedia_beasiswa(id) ON DELETE CASCADE
 );
 
--- Indexes for Optimization
-CREATE INDEX idx_scholarships_status ON scholarships(status);
-CREATE INDEX idx_scholarships_category ON scholarships(category_id);
-CREATE INDEX idx_scholarships_provider ON scholarships(provider_id);
-CREATE INDEX idx_scholarships_deadline ON scholarships(deadline_date);
-CREATE INDEX idx_scholarships_slug ON scholarships(slug);
+CREATE TABLE IF NOT EXISTS syarat_beasiswa (
+    id SERIAL PRIMARY KEY,
+    beasiswa_id INT NOT NULL,
+    syarat_dokumen TEXT NOT NULL,
+    ipk_minimal DECIMAL(3,2),
+    syarat_lainnya TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (beasiswa_id) REFERENCES informasi_beasiswa(id) ON DELETE CASCADE
+);
+
+-- Buat function untuk update timestamp otomatis
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Buat trigger untuk semua tabel
+CREATE TRIGGER update_admin_modtime BEFORE UPDATE ON akun_admin FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_kategori_modtime BEFORE UPDATE ON kategori_beasiswa FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_penyedia_modtime BEFORE UPDATE ON penyedia_beasiswa FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_beasiswa_modtime BEFORE UPDATE ON informasi_beasiswa FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_syarat_modtime BEFORE UPDATE ON syarat_beasiswa FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

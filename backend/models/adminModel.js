@@ -1,57 +1,56 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/database');
 
-const adminModel = {
+const Admin = {
   findByUsername: async (username) => {
-    const [rows] = await pool.query(
-      'SELECT id, username, password, nama_lengkap, created_at, updated_at FROM akun_admin WHERE username = ?',
-      [username]
-    );
-    return rows[0] || null;
-  },
-
-  findAll: async () => {
-    const [rows] = await pool.query(
-      'SELECT id, username, nama_lengkap, created_at, updated_at FROM akun_admin ORDER BY id DESC'
-    );
-    return rows;
+    const { data, error } = await supabase
+      .from('akun_admin')
+      .select('*')
+      .eq('username', username)
+      .single();
+      
+    if (error && error.code !== 'PGRST116') throw error; // PGRST116 is 'Row not found'
+    return data; // returns null if not found
   },
 
   findById: async (id) => {
-    const [rows] = await pool.query(
-      'SELECT id, username, nama_lengkap, created_at, updated_at FROM akun_admin WHERE id = ?',
-      [id]
-    );
-    return rows[0] || null;
+    const { data, error } = await supabase
+      .from('akun_admin')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
-  create: async ({ username, password, nama_lengkap }) => {
-    const [result] = await pool.query(
-      'INSERT INTO akun_admin (username, password, nama_lengkap) VALUES (?, ?, ?)',
-      [username, password, nama_lengkap]
-    );
-    return result.insertId;
+  create: async (adminData) => {
+    const { data, error } = await supabase
+      .from('akun_admin')
+      .insert([
+        {
+          username: adminData.username,
+          password: adminData.password,
+          nama_lengkap: adminData.nama_lengkap,
+          email: adminData.email,
+          role: adminData.role || 'admin'
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id; // Return inserted ID to match previous behavior
   },
 
-  update: async (id, { username, nama_lengkap, password }) => {
-    if (password) {
-      const [result] = await pool.query(
-        'UPDATE akun_admin SET username = ?, nama_lengkap = ?, password = ? WHERE id = ?',
-        [username, nama_lengkap, password, id]
-      );
-      return result.affectedRows > 0;
-    } else {
-      const [result] = await pool.query(
-        'UPDATE akun_admin SET username = ?, nama_lengkap = ? WHERE id = ?',
-        [username, nama_lengkap, id]
-      );
-      return result.affectedRows > 0;
-    }
-  },
-
-  delete: async (id) => {
-    const [result] = await pool.query('DELETE FROM akun_admin WHERE id = ?', [id]);
-    return result.affectedRows > 0;
-  },
+  // Fungsi tambahan untuk mendapatkan semua admin
+  findAll: async () => {
+    const { data, error } = await supabase
+      .from('akun_admin')
+      .select('id, username, nama_lengkap, email, role, created_at, updated_at');
+      
+    if (error) throw error;
+    return data;
+  }
 };
 
-module.exports = adminModel;
+module.exports = Admin;

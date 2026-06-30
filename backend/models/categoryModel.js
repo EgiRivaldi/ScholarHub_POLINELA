@@ -1,48 +1,81 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/database');
 
-const categoryModel = {
+const Category = {
   findAll: async () => {
-    const sql = `
-      SELECT k.*, COUNT(i.id) as jumlah_beasiswa
-      FROM kategori_beasiswa k
-      LEFT JOIN informasi_beasiswa i ON k.id = i.kategori_id
-      GROUP BY k.id
-      ORDER BY k.id DESC
-    `;
-    const [rows] = await pool.query(sql);
-    return rows;
+    // Dengan Supabase kita bisa join untuk count
+    // informasi_beasiswa(count)
+    const { data, error } = await supabase
+      .from('kategori_beasiswa')
+      .select(`
+        id, 
+        nama_kategori, 
+        deskripsi, 
+        created_at, 
+        updated_at,
+        informasi_beasiswa (count)
+      `)
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    
+    // Map hasilnya agar sesuai dengan format lama `total_beasiswa`
+    return data.map(item => ({
+      ...item,
+      total_beasiswa: item.informasi_beasiswa[0].count
+    }));
   },
 
   findById: async (id) => {
-    const [rows] = await pool.query('SELECT * FROM kategori_beasiswa WHERE id = ?', [id]);
-    return rows[0] || null;
+    const { data, error } = await supabase
+      .from('kategori_beasiswa')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
-  create: async ({ nama_kategori, deskripsi }) => {
-    const [result] = await pool.query(
-      'INSERT INTO kategori_beasiswa (nama_kategori, deskripsi) VALUES (?, ?)',
-      [nama_kategori, deskripsi]
-    );
-    return result.insertId;
+  create: async (categoryData) => {
+    const { data, error } = await supabase
+      .from('kategori_beasiswa')
+      .insert([
+        {
+          nama_kategori: categoryData.nama_kategori,
+          deskripsi: categoryData.deskripsi
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
   },
 
-  update: async (id, { nama_kategori, deskripsi }) => {
-    const [result] = await pool.query(
-      'UPDATE kategori_beasiswa SET nama_kategori = ?, deskripsi = ? WHERE id = ?',
-      [nama_kategori, deskripsi, id]
-    );
-    return result.affectedRows > 0;
+  update: async (id, categoryData) => {
+    const { data, error } = await supabase
+      .from('kategori_beasiswa')
+      .update({
+        nama_kategori: categoryData.nama_kategori,
+        deskripsi: categoryData.deskripsi
+      })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return data.length > 0 ? 1 : 0; // Return affectedRows equivalent
   },
 
   delete: async (id) => {
-    const [result] = await pool.query('DELETE FROM kategori_beasiswa WHERE id = ?', [id]);
-    return result.affectedRows > 0;
-  },
+    const { data, error } = await supabase
+      .from('kategori_beasiswa')
+      .delete()
+      .eq('id', id)
+      .select();
 
-  count: async () => {
-    const [rows] = await pool.query('SELECT COUNT(*) as total FROM kategori_beasiswa');
-    return rows[0].total;
-  },
+    if (error) throw error;
+    return data.length > 0 ? 1 : 0;
+  }
 };
 
-module.exports = categoryModel;
+module.exports = Category;
