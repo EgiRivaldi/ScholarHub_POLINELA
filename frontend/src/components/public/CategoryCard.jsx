@@ -1,12 +1,14 @@
-import { motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Landmark, Building, GraduationCap, Globe, BookOpen } from 'lucide-react';
+import { gsap } from 'gsap';
 
 const iconMap = {
   pemerintah: Landmark,
   swasta: Building,
   internal: GraduationCap,
   internasional: Globe,
+  bumn: Building,
 };
 
 const CategoryIcon = ({ name, className }) => {
@@ -15,99 +17,89 @@ const CategoryIcon = ({ name, className }) => {
 };
 
 export default function CategoryCard({ category, isSelected, onClick }) {
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Normalized position from -0.5 to 0.5
-    const xc = rect.width / 2;
-    const yc = rect.height / 2;
-    const dx = (x - xc) / xc; // -1 to 1
-    const dy = (y - yc) / yc; // -1 to 1
+  const cardRef = useRef(null);
 
-    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
-    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
-    e.currentTarget.style.setProperty('--tilt-x', `${dy * -8}deg`);
-    e.currentTarget.style.setProperty('--tilt-y', `${dx * 8}deg`);
-    e.currentTarget.style.setProperty('--shift-x', `${dx * 8}px`);
-    e.currentTarget.style.setProperty('--shift-y', `${dy * 8}px`);
-    e.currentTarget.style.setProperty('--y-offset', '-6px');
-  };
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const element = cardRef.current;
+    if (!element) return;
 
-  const handleMouseLeave = (e) => {
-    e.currentTarget.style.setProperty('--tilt-x', '0deg');
-    e.currentTarget.style.setProperty('--tilt-y', '0deg');
-    e.currentTarget.style.setProperty('--shift-x', '0px');
-    e.currentTarget.style.setProperty('--shift-y', '0px');
-    e.currentTarget.style.setProperty('--y-offset', '0px');
-  };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      const handleMouseMove = (e) => {
+        const rect = element.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+
+        gsap.to(element, {
+          rotationY: (x / rect.width) * 12,
+          rotationX: -(y / rect.height) * 12,
+          y: -4,
+          transformPerspective: 800,
+          transformOrigin: 'center center',
+          ease: 'power2.out',
+          duration: 0.35,
+        });
+      };
+
+      const handleMouseLeave = () => {
+        gsap.to(element, {
+          rotationY: 0,
+          rotationX: 0,
+          y: 0,
+          ease: 'elastic.out(1, 0.4)',
+          duration: 0.8,
+        });
+      };
+
+      element.addEventListener('mousemove', handleMouseMove);
+      element.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        element.removeEventListener('mousemove', handleMouseMove);
+        element.removeEventListener('mouseleave', handleMouseLeave);
+      };
+    }, element);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <motion.button
-      whileTap={{ scale: 0.98 }}
+    <button
+      ref={cardRef}
+      type="button"
       onClick={() => onClick?.(category)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        perspective: '1000px',
-        transformStyle: 'preserve-3d',
-      }}
-      className="group relative flex flex-col items-center text-center w-full cursor-pointer focus:outline-none"
-    >
-      {/* Outer dynamic blurry edge glow */}
-      {!isSelected && (
-        <div
-          className="glass-ios-edge-glow opacity-0 group-hover:opacity-100"
-          style={{
-            transform: 'translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 0)',
-          }}
-        />
+      className={cn(
+        'group flex flex-col items-center text-center p-5 rounded-2xl border transition-colors w-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 will-change-transform shadow-xs',
+        isSelected
+          ? 'bg-primary text-white border-primary shadow-md'
+          : 'bg-white text-slate-800 border-slate-200/90 hover:border-primary/50'
       )}
-
-      {/* Main glass content panel with tilt */}
+      style={{ transformStyle: 'preserve-3d' }}
+    >
       <div
         className={cn(
-          'flex flex-col items-center gap-4.5 p-6 rounded-[24px] border transition-all duration-300 w-full',
-          isSelected
-            ? 'bg-gradient-to-tr from-[#6200EE] to-[#7C3AED] text-white border-indigo-500/50 shadow-lg shadow-indigo-600/30'
-            : 'glass-ios glass-ios-shine border-white/60 group-hover:bg-white/55 group-hover:border-[#6200EE]/30 group-hover:shadow-[0_12px_28px_rgba(98,0,238,0.06)]'
+          'flex h-12 w-12 items-center justify-center rounded-2xl mb-3 transition-colors shadow-2xs',
+          isSelected ? 'bg-white/20 text-white' : 'bg-purple-50 text-primary group-hover:bg-purple-100/80 border border-purple-100'
         )}
-        style={{
-          transform: 'perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(var(--y-offset, 0px))',
-          transformStyle: 'preserve-3d',
-          transition: 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s, border-color 0.3s, box-shadow 0.3s',
-        }}
       >
-        <div
-          className={cn(
-            'flex h-11 w-11 items-center justify-center rounded-[14px] transition-all duration-300',
-            isSelected ? 'bg-white/20 shadow-inner' : 'bg-primary/10 border border-white/40 group-hover:scale-105 group-hover:bg-primary/20'
-          )}
-        >
-          <CategoryIcon
-            name={category.nama_kategori}
-            className={cn(
-              'h-5 w-5 transition-colors duration-300',
-              isSelected ? 'text-white' : 'text-[#6200EE]'
-            )}
-          />
-        </div>
-        <div>
-          <h3 className={cn(
-            'text-xs sm:text-sm font-bold tracking-tight transition-colors duration-200',
-            isSelected ? 'text-white' : 'text-slate-800 group-hover:text-primary'
-          )}>
-            {category.nama_kategori}
-          </h3>
-          <p className={cn(
-            'text-[10px] mt-1.5 font-black uppercase tracking-wider',
-            isSelected ? 'text-white/70' : 'text-slate-400'
-          )}>
-            {category.jumlah_beasiswa} beasiswa
-          </p>
-        </div>
+        <CategoryIcon name={category.nama_kategori} className="h-6 w-6" />
       </div>
-    </motion.button>
+
+      <h3 className="text-xs sm:text-sm font-bold tracking-tight line-clamp-1">
+        {category.nama_kategori}
+      </h3>
+      <p
+        className={cn(
+          'text-[10px] mt-1 font-bold uppercase tracking-wider',
+          isSelected ? 'text-white/80' : 'text-slate-400'
+        )}
+      >
+        {category.total_beasiswa !== undefined ? category.total_beasiswa : (category.jumlah_beasiswa || 0)} Beasiswa
+      </p>
+    </button>
   );
 }

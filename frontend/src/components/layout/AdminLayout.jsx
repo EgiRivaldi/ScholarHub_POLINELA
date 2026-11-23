@@ -11,7 +11,10 @@ const pageTitles = {
   '/admin/categories': 'Kategori',
   '/admin/providers': 'Penyedia',
   '/admin/requirements': 'Persyaratan',
+  '/admin/announcements': 'Pengumuman',
   '/admin/administrators': 'Administrator',
+  '/admin/settings': 'Pengaturan Situs',
+  '/admin/logs': 'Log Aktivitas',
 };
 
 export default function AdminLayout() {

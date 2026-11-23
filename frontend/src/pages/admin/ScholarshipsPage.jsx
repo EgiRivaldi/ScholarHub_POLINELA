@@ -40,20 +40,43 @@ const columns = [
     render: (value) => formatDate(value),
   },
   {
-    key: 'status',
-    label: 'Status',
-    render: (value) => (
-      <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-          value === 'active'
-            ? 'bg-emerald-500/15 text-emerald-755 border border-emerald-500/20'
-            : 'bg-rose-500/15 text-rose-755 border border-rose-500/20'
-        }`}
-      >
-        <span className={`h-1.5 w-1.5 rounded-full ${value === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-400'}`} />
-        {value === 'active' ? 'Aktif' : 'Tutup'}
-      </span>
-    ),
+    key: 'status_publikasi',
+    label: 'Publikasi',
+    render: (value) => {
+      const pubMap = {
+        terbit: { label: 'Terbit', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+        draf: { label: 'Draf', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+        arsip: { label: 'Arsip', color: 'bg-slate-100 text-slate-700 border-slate-200' },
+      };
+      const conf = pubMap[value] || pubMap.terbit;
+      return (
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${conf.color}`}>
+          {conf.label}
+        </span>
+      );
+    },
+  },
+  {
+    key: 'status_pendaftaran',
+    label: 'Pendaftaran',
+    render: (value) => {
+      const isDibuka = value === 'dibuka';
+      const isBelum = value === 'belum_dibuka';
+      return (
+        <span
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+            isDibuka
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : isBelum
+              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              : 'bg-rose-50 text-rose-700 border-rose-200'
+          }`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${isDibuka ? 'bg-emerald-500 animate-pulse' : isBelum ? 'bg-amber-500' : 'bg-rose-400'}`} />
+          {isDibuka ? 'Dibuka' : isBelum ? 'Segera' : 'Ditutup'}
+        </span>
+      );
+    },
   },
 ];
 

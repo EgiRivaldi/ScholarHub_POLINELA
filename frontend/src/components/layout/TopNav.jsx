@@ -1,8 +1,19 @@
 import { Menu, Bell, User } from 'lucide-react';
 
 export default function TopNav({ onMenuClick, title }) {
+  const storedUser = localStorage.getItem('admin');
+  let currentUser = null;
+  try {
+    currentUser = storedUser ? JSON.parse(storedUser) : null;
+  } catch (e) {}
+
+  const displayName = currentUser?.nama_lengkap || currentUser?.nama_pengguna || 'Admin';
+  const roleLabel = (currentUser?.peran === 'admin_utama' || currentUser?.role === 'admin_utama')
+    ? 'Admin Utama'
+    : 'Admin Konten';
+
   return (
-    <header className="sticky top-0 z-30 h-16 glass-ios bg-white/35 border-b border-white/40 shadow-sm">
+    <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200/80 shadow-xs">
       <div className="flex h-full items-center justify-between px-4 sm:px-6">
         {/* Left */}
         <div className="flex items-center gap-3">
@@ -31,8 +42,8 @@ export default function TopNav({ onMenuClick, title }) {
               <User className="h-4.5 w-4.5 text-primary" />
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-xs font-bold text-slate-800 leading-tight">Admin</p>
-              <p className="text-[9px] font-black text-slate-400 leading-tight uppercase tracking-wider">Administrator</p>
+              <p className="text-xs font-bold text-slate-800 leading-tight">{displayName}</p>
+              <p className="text-[9px] font-black text-primary leading-tight uppercase tracking-wider">{roleLabel}</p>
             </div>
           </div>
         </div>

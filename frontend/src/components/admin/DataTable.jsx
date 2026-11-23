@@ -80,8 +80,8 @@ export default function DataTable({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="glass-ios rounded-[24px] border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.03)] overflow-hidden bg-white"
+      transition={{ duration: 0.2 }}
+      className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden"
     >
       {/* Toolbar */}
       <div className="flex items-center justify-between p-4 border-b border-slate-200">
@@ -95,7 +95,7 @@ export default function DataTable({
               setCurrentPage(1);
             }}
             placeholder={searchPlaceholder}
-            className="w-full h-9 pl-9 pr-3 rounded-xl bg-white/5 border border-slate-200 text-xs text-text placeholder:text-text-secondary focus:outline-none focus:bg-white/10 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200"
+            className="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
           />
         </div>
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0 ml-4">

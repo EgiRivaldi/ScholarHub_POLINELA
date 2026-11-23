@@ -18,6 +18,9 @@ const CategoriesPage = lazy(() => import('@/pages/admin/CategoriesPage'));
 const ProvidersPage = lazy(() => import('@/pages/admin/ProvidersPage'));
 const RequirementsPage = lazy(() => import('@/pages/admin/RequirementsPage'));
 const AdminsPage = lazy(() => import('@/pages/admin/AdminsPage'));
+const AnnouncementsPage = lazy(() => import('@/pages/admin/AnnouncementsPage'));
+const SettingsPage = lazy(() => import('@/pages/admin/SettingsPage'));
+const ActivityLogsPage = lazy(() => import('@/pages/admin/ActivityLogsPage'));
 
 const NotFoundPage = lazy(() => import('@/pages/errors/NotFoundPage'));
 
@@ -28,21 +31,6 @@ const PageLoader = () => (
 );
 
 export default function App() {
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const card = e.target.closest('.glass-ios-shine, .glass-card, .scholarship-card, .category-card, .sidebar-item');
-      if (card) {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        card.style.setProperty('--mouse-x', `${x}px`);
-        card.style.setProperty('--mouse-y', `${y}px`);
-      }
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   return (
     <BrowserRouter>
       <Toaster
@@ -75,7 +63,10 @@ export default function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="providers" element={<ProvidersPage />} />
             <Route path="requirements" element={<RequirementsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
             <Route path="administrators" element={<AdminsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="logs" element={<ActivityLogsPage />} />
           </Route>
 
           {/* 404 */}

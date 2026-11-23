@@ -59,25 +59,15 @@ export default function LoginPage() {
         <div className="glass-ios rounded-[32px] border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.06)] p-8 sm:p-10">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/50 shadow-sm mb-4 group-hover:scale-105 transition-transform duration-300 shrink-0">
-              <svg className="h-12 w-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#6200EE" />
-                    <stop offset="100%" stopColor="#7C3AED" />
-                  </linearGradient>
-                  <linearGradient id="limeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#84CC16" />
-                    <stop offset="100%" stopColor="#A3E635" />
-                  </linearGradient>
-                </defs>
-                <path d="M50 15 L82 32 L50 49 L18 32 Z" fill="url(#purpleGrad)" />
-                <path d="M32 38 V48 C32 58 68 58 68 48 V38" fill="url(#purpleGrad)" opacity="0.9" />
-                <path d="M50 32 C50 32 74 34 74 46 C74 58 46 55 46 67 C46 78 74 78 74 78" stroke="url(#limeGrad)" strokeWidth="8" strokeLinecap="round" fill="none" />
-              </svg>
+            <div className="flex h-18 w-18 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-xs mb-4 p-2 shrink-0">
+              <img
+                src="/images/polinela-logo.png"
+                alt="Logo Politeknik Negeri Lampung"
+                className="h-full w-full object-contain"
+              />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-800 text-glow">Selamat Datang Kembali</h1>
-            <p className="text-[10px] font-black text-slate-400 mt-1.5 uppercase tracking-wider">Masuk ke Panel Admin</p>
+            <h1 className="text-xl font-bold tracking-tight text-slate-800 text-glow">Portal Administrator</h1>
+            <p className="text-[10px] font-black text-slate-400 mt-1.5 uppercase tracking-wider">Politeknik Negeri Lampung</p>
           </div>
 
           {/* Form */}

@@ -1,81 +1,153 @@
-const { supabase } = require('../config/database');
+const { pool } = require('../config/database');
+const { slugify } = require('../utils/slugify');
+
+const formatCategoryRow = (row) => {
+  if (!row) return null;
+  return {
+    id: row.id,
+    nama_kategori: row.nama_kategori,
+    slug: row.slug,
+    deskripsi: row.deskripsi,
+    total_beasiswa: Number(row.total_beasiswa || 0),
+    dibuat_pada: row.dibuat_pada,
+    diperbarui_pada: row.diperbarui_pada,
+    // legacy alias
+    created_at: row.dibuat_pada,
+    updated_at: row.diperbarui_pada,
+  };
+};
 
 const Category = {
   findAll: async () => {
-    // Dengan Supabase kita bisa join untuk count
-    // informasi_beasiswa(count)
-    const { data, error } = await supabase
-      .from('kategori_beasiswa')
-      .select(`
-        id, 
-        nama_kategori, 
-        deskripsi, 
-        created_at, 
-        updated_at,
-        informasi_beasiswa (count)
-      `)
-      .order('id', { ascending: true });
-
-    if (error) throw error;
-    
-    // Map hasilnya agar sesuai dengan format lama `total_beasiswa`
-    return data.map(item => ({
-      ...item,
-      total_beasiswa: item.informasi_beasiswa[0].count
-    }));
+    const query = `
+      SELECT 
+        k.id,
+        k.nama_kategori,
+        k.slug,
+        k.deskripsi,
+        k.dibuat_pada,
+        k.diperbarui_pada,
+        COUNT(b.id) AS total_beasiswa
+      FROM kategori_beasiswa k
+      LEFT JOIN beasiswa b ON b.kategori_id = k.id
+      GROUP BY k.id
+      ORDER BY k.id ASC
+    `;
+    const [rows] = await pool.query(query);
+    return rows.map(formatCategoryRow);
   },
 
   findById: async (id) => {
-    const { data, error } = await supabase
-      .from('kategori_beasiswa')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const query = `
+      SELECT 
+        k.id,
+        k.nama_kategori,
+        k.slug,
+        k.deskripsi,
+        k.dibuat_pada,
+        k.diperbarui_pada,
+        COUNT(b.id) AS total_beasiswa
+      FROM kategori_beasiswa k
+      LEFT JOIN beasiswa b ON b.kategori_id = k.id
+      WHERE k.id = ?
+      GROUP BY k.id
+      LIMIT 1
+    `;
+    const [rows] = await pool.query(query, [id]);
+    if (!rows || rows.length === 0) return null;
+    return formatCategoryRow(rows[0]);
+  },
 
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+  findBySlug: async (slug) => {
+    const query = `
+      SELECT 
+        k.id,
+        k.nama_kategori,
+        k.slug,
+        k.deskripsi,
+        k.dibuat_pada,
+        k.diperbarui_pada,
+        COUNT(b.id) AS total_beasiswa
+      FROM kategori_beasiswa k
+      LEFT JOIN beasiswa b ON b.kategori_id = k.id
+      WHERE k.slug = ?
+      GROUP BY k.id
+      LIMIT 1
+    `;
+    const [rows] = await pool.query(query, [slug]);
+    if (!rows || rows.length === 0) return null;
+    return formatCategoryRow(rows[0]);
   },
 
   create: async (categoryData) => {
-    const { data, error } = await supabase
-      .from('kategori_beasiswa')
-      .insert([
-        {
-          nama_kategori: categoryData.nama_kategori,
-          deskripsi: categoryData.deskripsi
-        }
-      ])
-      .select()
-      .single();
+    const nama_kategori = categoryData.nama_kategori;
+    let slug = categoryData.slug || slugify(nama_kategori);
+    const deskripsi = categoryData.deskripsi || null;
 
-    if (error) throw error;
-    return data.id;
+    // Ensure unique slug
+    let finalSlug = slug;
+    let counter = 1;
+    while (true) {
+      const [existing] = await pool.query('SELECT id FROM kategori_beasiswa WHERE slug = ? LIMIT 1', [finalSlug]);
+      if (existing.length === 0) break;
+      finalSlug = `${slug}-${counter}`;
+      counter++;
+    }
+
+    const [result] = await pool.query(
+      'INSERT INTO kategori_beasiswa (nama_kategori, slug, deskripsi) VALUES (?, ?, ?)',
+      [nama_kategori, finalSlug, deskripsi]
+    );
+    return result.insertId;
   },
 
   update: async (id, categoryData) => {
-    const { data, error } = await supabase
-      .from('kategori_beasiswa')
-      .update({
-        nama_kategori: categoryData.nama_kategori,
-        deskripsi: categoryData.deskripsi
-      })
-      .eq('id', id)
-      .select();
+    const updates = [];
+    const values = [];
 
-    if (error) throw error;
-    return data.length > 0 ? 1 : 0; // Return affectedRows equivalent
+    if (categoryData.nama_kategori !== undefined) {
+      updates.push('nama_kategori = ?');
+      values.push(categoryData.nama_kategori);
+
+      if (!categoryData.slug) {
+        let slug = slugify(categoryData.nama_kategori);
+        let finalSlug = slug;
+        let counter = 1;
+        while (true) {
+          const [existing] = await pool.query('SELECT id FROM kategori_beasiswa WHERE slug = ? AND id != ? LIMIT 1', [finalSlug, id]);
+          if (existing.length === 0) break;
+          finalSlug = `${slug}-${counter}`;
+          counter++;
+        }
+        updates.push('slug = ?');
+        values.push(finalSlug);
+      }
+    }
+
+    if (categoryData.slug !== undefined) {
+      updates.push('slug = ?');
+      values.push(categoryData.slug);
+    }
+
+    if (categoryData.deskripsi !== undefined) {
+      updates.push('deskripsi = ?');
+      values.push(categoryData.deskripsi);
+    }
+
+    if (updates.length === 0) return 0;
+
+    values.push(id);
+    const [result] = await pool.query(
+      `UPDATE kategori_beasiswa SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+    return result.affectedRows;
   },
 
   delete: async (id) => {
-    const { data, error } = await supabase
-      .from('kategori_beasiswa')
-      .delete()
-      .eq('id', id)
-      .select();
-
-    if (error) throw error;
-    return data.length > 0 ? 1 : 0;
-  }
+    const [result] = await pool.query('DELETE FROM kategori_beasiswa WHERE id = ?', [id]);
+    return result.affectedRows;
+  },
 };
 
 module.exports = Category;

@@ -15,6 +15,9 @@ const scholarshipRoutes = require('./routes/scholarshipRoutes');
 const requirementRoutes = require('./routes/requirementRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const activityLogRoutes = require('./routes/activityLogRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
+const settingRoutes = require('./routes/settingRoutes');
 
 const app = express();
 
@@ -63,6 +66,9 @@ app.use('/api/scholarships', scholarshipRoutes);
 app.use('/api/requirements', requirementRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/logs', activityLogRoutes);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/settings', settingRoutes);
 
 // Catch-all for undefined API routes (404)
 app.use((req, res) => {

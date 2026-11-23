@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const scholarshipController = require('../controllers/scholarshipController');
-const { isAuthenticated } = require('../middleware/authMiddleware');
+const { isAuthenticated, optionalAuth } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const { sanitizeBody, validateScholarship } = require('../middleware/validateMiddleware');
 
-router.get('/', scholarshipController.getAll);
-router.get('/:id', scholarshipController.getById);
+// Public routes with optional auth so admins can see their drafts when logged in
+router.get('/', optionalAuth, scholarshipController.getAll);
+router.get('/:id', optionalAuth, scholarshipController.getById);
 
+// Protected routes (Admin only)
 router.post(
   '/',
   isAuthenticated,

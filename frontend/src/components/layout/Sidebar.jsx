@@ -6,6 +6,9 @@ import {
   Building2,
   ClipboardList,
   Users,
+  Megaphone,
+  Settings,
+  History,
   LogOut,
   X,
 } from 'lucide-react';
@@ -20,12 +23,30 @@ const menuItems = [
   { label: 'Kategori', path: '/admin/categories', icon: FolderOpen },
   { label: 'Penyedia', path: '/admin/providers', icon: Building2 },
   { label: 'Persyaratan', path: '/admin/requirements', icon: ClipboardList },
-  { label: 'Administrator', path: '/admin/administrators', icon: Users },
+  { label: 'Pengumuman', path: '/admin/announcements', icon: Megaphone },
+  { label: 'Administrator', path: '/admin/administrators', icon: Users, superAdminOnly: true },
+  { label: 'Pengaturan Situs', path: '/admin/settings', icon: Settings, superAdminOnly: true },
+  { label: 'Log Aktivitas', path: '/admin/logs', icon: History, superAdminOnly: true },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const storedUser = localStorage.getItem('admin');
+  let currentUser = null;
+  try {
+    currentUser = storedUser ? JSON.parse(storedUser) : null;
+  } catch (e) {}
+
+  const isSuperAdmin = currentUser?.peran === 'admin_utama' || currentUser?.role === 'admin_utama';
+
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (item.superAdminOnly && !isSuperAdmin) {
+      return false;
+    }
+    return true;
+  });
 
   const handleLogout = async () => {
     try {
@@ -45,31 +66,21 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col glass-ios border-r border-white/50">
+    <div className="flex h-full flex-col bg-white border-r border-slate-200/80">
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-5 border-b border-white/40">
+      <div className="flex h-16 items-center justify-between px-5 border-b border-slate-100">
         <Link to="/admin" className="flex items-center gap-2.5 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200/50 shadow-sm group-hover:scale-105 transition-transform duration-300 shrink-0">
-            <svg className="h-8.5 w-8.5" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6D28D9" />
-                  <stop offset="100%" stopColor="#8B5CF6" />
-                </linearGradient>
-                <linearGradient id="limeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#84CC16" />
-                  <stop offset="100%" stopColor="#A3E635" />
-                </linearGradient>
-              </defs>
-              <path d="M50 15 L82 32 L50 49 L18 32 Z" fill="url(#purpleGrad)" />
-              <path d="M32 38 V48 C32 58 68 58 68 48 V38" fill="url(#purpleGrad)" opacity="0.9" />
-              <path d="M50 32 C50 32 74 34 74 46 C74 58 46 55 46 67 C46 78 74 78 74 78" stroke="url(#limeGrad)" strokeWidth="8" strokeLinecap="round" fill="none" />
-            </svg>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-2xs group-hover:scale-105 transition-transform duration-300 shrink-0 p-1">
+            <img
+              src="/images/polinela-logo.png"
+              alt="Logo POLINELA"
+              className="h-full w-full object-contain"
+            />
           </div>
           <div className="flex flex-col">
-            <span className="text-[13px] font-black text-slate-800 leading-tight group-hover:text-primary transition-colors duration-300">ScholarHub</span>
-            <span className="text-[8px] font-black text-slate-400 leading-none tracking-wider uppercase">
-              Panel Admin
+            <span className="text-[13px] font-black text-slate-900 leading-tight group-hover:text-primary transition-colors duration-300">ScholarHub</span>
+            <span className="text-[8px] font-bold text-slate-400 leading-none tracking-widest uppercase">
+              POLINELA ADMIN
             </span>
           </div>
         </Link>
@@ -77,7 +88,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Close button - Mobile */}
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg text-slate-500 hover:bg-white/40 lg:hidden transition-colors"
+          className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden transition-colors"
           aria-label="Close sidebar"
         >
           <X className="h-5 w-5" />
@@ -86,7 +97,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
           return (
@@ -97,8 +108,8 @@ export default function Sidebar({ isOpen, onClose }) {
               className={cn(
                 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 relative border',
                 active
-                  ? 'text-primary bg-white/60 border-white/50 shadow-sm'
-                  : 'text-slate-600 border-transparent hover:bg-white/30 hover:border-white/20 hover:text-slate-900'
+                  ? 'text-primary bg-purple-50 border-purple-200/80 shadow-xs'
+                  : 'text-slate-600 border-transparent hover:bg-slate-50 hover:border-slate-200/60 hover:text-slate-900'
               )}
             >
               {active && (
@@ -112,10 +123,10 @@ export default function Sidebar({ isOpen, onClose }) {
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t border-white/40">
+      <div className="px-3 py-4 border-t border-slate-100">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all duration-200 cursor-pointer"
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all duration-200 cursor-pointer"
         >
           <LogOut className="h-[18px] w-[18px] shrink-0" />
           <span>Keluar</span>

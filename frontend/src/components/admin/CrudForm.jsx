@@ -22,6 +22,8 @@ export default function CrudForm({
     tanggal_buka: '',
     tanggal_tutup: '',
     url_pendaftaran: '',
+    url_sumber_resmi: '',
+    status_publikasi: 'terbit',
     gambar: null,
     ipk_minimum: '',
     semester_minimum: '',
@@ -32,14 +34,16 @@ export default function CrudForm({
     if (isOpen) {
       const timer = setTimeout(() => {
         setFormData({
-          nama_beasiswa: initialData?.nama_beasiswa || '',
+          nama_beasiswa: initialData?.judul || initialData?.nama_beasiswa || '',
           kategori_id: initialData?.kategori_id || '',
-          penyedia_id: initialData?.penyedia_id || '',
+          penyedia_id: initialData?.penyelenggara_id || initialData?.penyedia_id || '',
           deskripsi: initialData?.deskripsi || '',
           tanggal_buka: initialData?.tanggal_buka ? initialData.tanggal_buka.substring(0, 10) : '',
           tanggal_tutup: initialData?.tanggal_tutup ? initialData.tanggal_tutup.substring(0, 10) : '',
           url_pendaftaran: initialData?.url_pendaftaran || '',
-          gambar: initialData?.gambar || null,
+          url_sumber_resmi: initialData?.url_sumber_resmi || '',
+          status_publikasi: initialData?.status_publikasi || 'terbit',
+          gambar: initialData?.url_gambar || initialData?.gambar || null,
           ipk_minimum: initialData?.ipk_minimum || '',
           semester_minimum: initialData?.semester_minimum || '',
           dokumen_persyaratan: initialData?.dokumen_persyaratan || '',
@@ -246,21 +250,56 @@ export default function CrudForm({
                   </div>
                 </div>
 
-                {/* Registration URL */}
+                {/* Registration URL & Official Source URL */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="url_pendaftaran" className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                      URL Pendaftaran <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      id="url_pendaftaran"
+                      name="url_pendaftaran"
+                      type="url"
+                      required
+                      value={formData.url_pendaftaran}
+                      onChange={handleChange}
+                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="url_sumber_resmi" className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                      URL Sumber Resmi
+                    </label>
+                    <input
+                      id="url_sumber_resmi"
+                      name="url_sumber_resmi"
+                      type="url"
+                      value={formData.url_sumber_resmi}
+                      onChange={handleChange}
+                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200"
+                      placeholder="https://kemdikbud.go.id/..."
+                    />
+                  </div>
+                </div>
+
+                {/* Status Publikasi */}
                 <div>
-                  <label htmlFor="url_pendaftaran" className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                    URL Pendaftaran <span className="text-rose-500">*</span>
+                  <label htmlFor="status_publikasi" className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                    Status Publikasi <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    id="url_pendaftaran"
-                    name="url_pendaftaran"
-                    type="url"
+                  <select
+                    id="status_publikasi"
+                    name="status_publikasi"
                     required
-                    value={formData.url_pendaftaran}
+                    value={formData.status_publikasi}
                     onChange={handleChange}
-                    className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200"
-                    placeholder="https://..."
-                  />
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200"
+                  >
+                    <option value="terbit">Terbit (Dapat Dilihat Publik)</option>
+                    <option value="draf">Draf (Hanya Terlihat di Admin)</option>
+                    <option value="arsip">Arsip (Program Telah Selesai / Diarsipkan)</option>
+                  </select>
                 </div>
 
                 {/* Image Upload */}

@@ -90,8 +90,8 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.3 }}
-        className="glass-ios rounded-[24px] border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.03)] overflow-hidden bg-white"
+        transition={{ duration: 0.2 }}
+        className="rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden bg-white"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div>

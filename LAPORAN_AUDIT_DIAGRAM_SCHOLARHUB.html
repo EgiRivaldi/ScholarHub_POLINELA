@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Audit Perancangan Sistem - ScholarHub POLINELA</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    body {
+      font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+      line-height: 1.55;
+      color: #1e293b;
+      background: #ffffff;
+      font-size: 10.5pt;
+      margin: 0;
+      padding: 0;
+    }
+    .header-box {
+      border-bottom: 3px double #0284c7;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .inst-name {
+      font-size: 14pt;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    .sub-inst {
+      font-size: 11pt;
+      font-weight: 600;
+      color: #0369a1;
+      margin: 2px 0 6px 0;
+    }
+    .doc-title {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #0f172a;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin: 10px 0 6px 0;
+    }
+    .meta-info {
+      font-size: 9pt;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    h2 {
+      font-size: 12pt;
+      color: #0369a1;
+      border-left: 4px solid #0284c7;
+      padding-left: 8px;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    h3 {
+      font-size: 10.5pt;
+      color: #0f172a;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    p {
+      margin: 0 0 8px 0;
+      text-align: justify;
+    }
+    ul, ol {
+      margin: 0 0 10px 0;
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Badges & Alerts */
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      font-size: 8pt;
+      font-weight: 700;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .badge-critical { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .badge-warning { background-color: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .badge-success { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-info { background-color: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+
+    .callout {
+      background: #f8fafc;
+      border-left: 4px solid #64748b;
+      padding: 10px 12px;
+      margin: 10px 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 9.5pt;
+    }
+    .callout-critical {
+      background: #fff5f5;
+      border-left-color: #ef4444;
+      border-top: 1px solid #fee2e2;
+      border-right: 1px solid #fee2e2;
+      border-bottom: 1px solid #fee2e2;
+    }
+    .callout-success {
+      background: #f0fdf4;
+      border-left-color: #22c55e;
+      border-top: 1px solid #dcfce7;
+      border-right: 1px solid #dcfce7;
+      border-bottom: 1px solid #dcfce7;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 9pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: center;
+    }
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+    .footer-note {
+      font-size: 8pt;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 25px;
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- KOP DOKUMEN -->
+  <div class="header-box">
+    <div class="inst-name">POLITEKNIK NEGERI LAMPUNG</div>
+    <div class="sub-inst">PENGEMBANGAN SISTEM INFORMASI BEASISWA (SCHOLARHUB POLINELA)</div>
+    <div class="doc-title">LAPORAN AUDIT & EVALUASI KELAYAKAN PERANCANGAN SISTEM<br><span style="font-size: 10.5pt; font-weight: normal; color: #334155;">(Entity Relationship Diagram, Data Flow Diagram Level 1, Mapping Chart Swimlane, & Flowchart 1 s.d. 8)</span></div>
+    <div class="meta-info">Fokus Analisis: Sinkronisasi Arsitektur Dokumen Skripsi dengan Implementasi Nyata Website (MySQL, Express.js, React)</div>
+  </div>
+
+  <!-- 1. PENDAHULUAN & RINGKASAN EKSEKUTIF -->
+  <h2>1. Ringkasan Eksekutif & Penilaian Keseluruhan</h2>
+  <p>
+    Audit komparatif ini dilakukan terhadap dokumen perancangan sistem yang telah disusun dengan implementasi nyata pada sistem <strong>ScholarHub POLINELA</strong> yang saat ini aktif di <code>localhost</code>.
+  </p>
+  <div class="callout callout-success">
+    <strong>Tingkat Keselarasan Arsitektur: ~88% (Sangat Baik & Matang)</strong><br>
+    Perancangan sistem telah berhasil mempertahankan batasan lingkup akademik yang tepat:
+    <ul>
+      <li><strong>Akses Mahasiswa/Publik Tanpa Login:</strong> Mahasiswa dapat mencari beasiswa, menyaring kategori, melihat persyaratan lengkap, dan membaca jadwal tanpa registrasi akun.</li>
+      <li><strong>Bukan Portal Seleksi Internal:</strong> Sistem tidak memuat form pendaftaran mahasiswa, unggah berkas, maupun seleksi internal. Mahasiswa langsung diarahkan ke tautan portal resmi penyedia beasiswa.</li>
+      <li><strong>Manajemen Berjenjang:</strong> Pemisahan peran antara <code>admin</code> (pengelola konten) dan <code>admin_utama</code> (pengelola akun & konfigurasi situs) terdokumentasi dengan baik.</li>
+    </ul>
+  </div>
+  <p>
+    Meskipun secara konseptual sudah sangat tepat, terdapat <strong>2 kekeliruan kritis</strong> dan <strong>beberapa inkonsistensi minor</strong> yang perlu disesuaikan sebelum disajikan pada Seminar Hasil (Semhas) atau Naskah Skripsi.
+  </p>
+
+  <!-- 2. AUDIT ERD -->
+  <h2>2. Evaluasi Entity Relationship Diagram (ERD)</h2>
+  <p>
+    ERD menggambarkan 8 entitas utama: <code>pengguna</code>, <code>beasiswa</code>, <code>kategori_beasiswa</code>, <code>penyelenggara_beasiswa</code>, <code>persyaratan_beasiswa</code>, <code>pengumuman</code>, <code>pengaturan_situs</code>, dan <code>log_aktivitas</code>.
+  </p>
+
+  <div class="callout callout-critical">
+    <span class="badge badge-critical">Temuan Kritis #1</span> <strong>Salah Label Entitas <code>log_aktivitas</code></strong><br>
+    <ul>
+      <li><strong>Kondisi Diagram:</strong> Kotak persegi panjang di pojok kiri bawah tertulis <code>pengaturan_situs</code>. Padahal atribut yang terhubung adalah: <code>id</code>, <code>pengguna_id</code>, <code>aksi</code>, <code>jenis_entitas</code>, <code>id_entitas</code>, <code>data_sebelum</code>, <code>data_sesudah</code>, dan <code>dibuat_pada</code>.</li>
+      <li><strong>Dampak:</strong> Muncul 2 entitas kembar bernama <code>pengaturan_situs</code>, sementara tabel <code>log_aktivitas</code> menjadi hilang dari ERD.</li>
+      <li><strong>Rekomendasi Perbaikan:</strong> Ganti label kotak kiri bawah menjadi <strong><code>log_aktivitas</code></strong>.</li>
+    </ul>
+  </div>
+
+  <h3>Temuan Minor & Validasi Kardinalitas ERD:</h3>
+  <ul>
+    <li><span class="badge badge-warning">Duplikasi Atribut</span> Pada entitas <code>persyaratan_beasiswa</code>, terdapat dua oval bernama <code>nama_persyaratan</code>. Hapus salah satu oval duplikat.</li>
+    <li><span class="badge badge-info">Atribut Non-Eksis</span> Pada <code>kategori_beasiswa</code>, terdapat oval <code>diperbarui_oleh (FK)</code>. Pada database nyata, tabel kategori hanya terdiri dari <code>id</code>, <code>nama_kategori</code>, <code>slug</code>, <code>deskripsi</code>, <code>dibuat_pada</code>, <code>diperbarui_pada</code>. Oval tersebut sebaiknya dihapus.</li>
+    <li><strong>Kardinalitas Relasi:</strong> Relasi 1:N pada <code>kategori_beasiswa</code> &rarr; <code>beasiswa</code>, <code>penyelenggara_beasiswa</code> &rarr; <code>beasiswa</code>, <code>beasiswa</code> &rarr; <code>persyaratan_beasiswa</code> (1:N multi-record), serta relasi audit <code>pengguna</code> ke seluruh modul sudah <strong>100% Benar</strong>.</li>
+  </ul>
+
+  <!-- 3. AUDIT DFD LEVEL 1 -->
+  <h2>3. Evaluasi Data Flow Diagram (DFD Level 1)</h2>
+
+  <h3>3.1. DFD Mahasiswa / Pengunjung (Proses 4.0 - Sajikan Informasi Beasiswa)</h3>
+  <p>
+    <span class="badge badge-success">Status: 100% Valid & Sangat Tepat</span><br>
+    Aliran data masuk ke Proses 4.0 murni berupa data referensi publik (read-only): <em>Data kategori, Data penyelenggara, Beasiswa berstatus terbit, Data persyaratan, Pengaturan publik, dan Pengumuman aktif</em>. Aliran data keluar ke <code>Mahasiswa / Pengunjung</code> berupa daftar, detail, jadwal, syarat, dan tautan resmi. Tidak ada aliran simpan berkas mahasiswa ke data store.
+  </p>
+
+  <h3>3.2. DFD Administrator (Proses 1.0, 2.0, 3.0, 5.0, 6.0)</h3>
+  <div class="callout callout-critical">
+    <span class="badge badge-critical">Temuan Kritis #2</span> <strong>Arah Panah Log Aktivitas Terbalik</strong><br>
+    Pada Proses 2.0 (Kelola Kategori & Penyelenggara) dan Proses 6.0 (Kelola Pengaturan Situs), aliran data <em>"Log perubahan referensi"</em> dan <em>"Log perubahan pengaturan"</em> memiliki mata panah yang mengarah <strong>DARI</strong> Data Store <code>Log Aktivitas</code> <strong>MENUJU</strong> Proses.<br>
+    <em>Kaidah Baku DFD:</em> Karena proses mencatat/menulis data ke data store (operasi write), mata panah wajib mengarah <strong>DARI Proses MENUJU Data Store <code>Log Aktivitas</code></strong>.
+  </div>
+  <div class="callout callout-warning">
+    <span class="badge badge-warning">Penyesuaian Otorisasi</span> <strong>Entitas Pemicu Proses 6.0</strong><br>
+    Proses 6.0 (Kelola Pengaturan Situs) pada diagram terhubung ke entitas umum <code>Administrator</code>. Dalam implementasi sistem, modul pengaturan situs dilindungi hak akses ketat khusus <code>Admin Utama</code>. Sebaiknya proses 6.0 dipindahkan ke diagram DFD Admin Utama.
+  </div>
+
+  <h3>3.3. DFD Admin Utama (Proses 7.0 & 8.0)</h3>
+  <ul>
+    <li><strong>Proses 7.0 (Kelola Akun Administrator):</strong> Aliran <em>"Log perubahan akun"</em> juga perlu dibalik arah panahnya agar menuju ke Data Store <code>Log Aktivitas</code>.</li>
+    <li><strong>Proses 8.0 (Lihat Log Aktivitas):</strong> <span class="badge badge-success">Valid</span>. Mengambil data dari <code>Log Aktivitas</code> dan <code>Pengguna</code>, lalu menampilkan riwayat aktivitas terfilter kepada Admin Utama.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- 4. AUDIT FLOWCHART SISTEM -->
+  <h2>4. Evaluasi Flowchart Sistem (Flowchart 1 s.d. 8)</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 28%;">Nama Flowchart</th>
+        <th style="width: 14%;">Status</th>
+        <th>Analisis & Rekomendasi Penyempurnaan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Flowchart 1</strong><br>Halaman Pengunjung</td>
+        <td><span class="badge badge-info">Saran Alur</span></td>
+        <td>
+          Alur saat ini langsung menuju <em>Selesai</em> setelah menampilkan detail beasiswa. <strong>Saran:</strong> Tambahkan percabangan keputusan setelah detail: <em>"Apakah ingin mendaftar beasiswa?"</em> &rarr; Jika Ya, arahkan ke aksi <em>"Klik Tautan Resmi (Dialihkan ke Website Eksternal Penyelenggara)"</em> &rarr; <em>Selesai</em>.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Flowchart 2</strong><br>Autentikasi Administrator</td>
+        <td><span class="badge badge-success">Sangat Baik</span></td>
+        <td>
+          Alur sangat lengkap: validasi username/password, handling gagal login, pencatatan log aktivitas login, serta percabangan otomatis menuju Dashboard Admin Utama atau Dashboard Administrator sesuai role.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Flowchart 3</strong><br>Kelola Kategori & Penyelenggara</td>
+        <td><span class="badge badge-success">Sesuai</span></td>
+        <td>
+          Aksi Tambah, Ubah, dan Hapus (dengan konfirmasi) telah lengkap dan masing-masing aksi menyimpan perubahan serta mencatat ke log aktivitas.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Flowchart 4</strong><br>Kelola Beasiswa & Persyaratan</td>
+        <td><span class="badge badge-success">Unggulan</span></td>
+        <td>
+          Struktur alur terbaik: mencakup Tambah, Ubah, Hapus, dan Pengaturan Publikasi (Draf/Terbit/Arsip). Mendukung pengisian multi-record persyaratan beasiswa yang sinkron dengan database.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Flowchart 5</strong><br>Kelola Pengumuman</td>
+        <td><span class="badge badge-success">Sesuai</span></td>
+        <td>
+          Mengakomodasi CRUD pengumuman, pengaturan urutan tampil, dan jadwal tayang yang tercatat ke log aktivitas.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Flowchart 6</strong><br>Kelola Pengaturan Situs</td>
+        <td><span class="badge badge-critical">Perlu Koreksi</span></td>
+        <td>
+          Kotak awal tertulis <code>Display Dashboard Administrator</code>. <strong>Koreksi:</strong> Ubah menjadi <code>Display Dashboard Admin Utama</code>, karena administrator biasa tidak memiliki wewenang mengubah konfigurasi situs.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Flowchart 7</strong><br>Kelola Akun Administrator</td>
+        <td><span class="badge badge-success">Unggulan</span></td>
+        <td>
+          Sangat baik karena menyediakan cabang khusus <strong>"Ubah Status (Aktif / Nonaktif)"</strong> di samping opsi Hapus. Hal ini sesuai dengan aturan integritas basis data di sistem (akun yang telah memiliki riwayat konten dinonaktifkan secara aman).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Flowchart 8</strong><br>Lihat Log Aktivitas</td>
+        <td><span class="badge badge-success">Sesuai</span></td>
+        <td>
+          Menampilkan seluruh riwayat aktivitas dan mengakomodasi fitur filter audit bagi Admin Utama.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 5. AUDIT MAPPING CHART SWIMLANE -->
+  <h2>5. Evaluasi Mapping Chart (Swimlane Diagram)</h2>
+  <ul>
+    <li>
+      <strong>Mapping Chart Administrator:</strong> Pada menu pilihan pengelolaan tertulis opsi <em>Pengaturan Situs</em>. <strong>Koreksi:</strong> Hapus teks <em>Pengaturan Situs</em> dari alur Administrator biasa, karena menu ini khusus milik Admin Utama.
+    </li>
+    <li>
+      <strong>Mapping Chart Admin Utama:</strong> Pada kotak menu tertulis <em>"Menu Administrator + Kelola Akun Admin / Log Aktivitas"</em>. <strong>Penyempurnaan:</strong> Tambahkan teks <em>"Pengaturan Situs"</em> secara eksplisit agar mencerminkan hak istimewa Super Admin secara utuh.
+    </li>
+    <li>
+      <strong>Mapping Chart Mahasiswa / Pengunjung:</strong> Alur swimlane antara Mahasiswa dan Sistem sudah sinkron. Disarankan menambahkan interaksi klik <em>"Kunjungi Situs Resmi Mitra"</em> pada tahap akhir detail beasiswa.
+    </li>
+  </ul>
+
+  <!-- 6. TABEL MATRIKS REKAPITULASI EVALUASI -->
+  <h2>6. Matriks Rekapitulasi Rencana Tindakan Revisi</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 5%;">No</th>
+        <th style="width: 20%;">Dokumen</th>
+        <th style="width: 25%;">Komponen / Lokasi</th>
+        <th style="width: 12%;">Tingkat</th>
+        <th>Tindakan Perbaikan Konkret</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: center;">1</td>
+        <td><strong>ERD</strong></td>
+        <td>Entitas kotak kiri bawah</td>
+        <td><span class="badge badge-critical">Kritis</span></td>
+        <td>Ganti label kotak <code>pengaturan_situs</code> menjadi <strong><code>log_aktivitas</code></strong>.</td>
+      </tr>
+      <tr>
+        <td style="text-align: center;">2</td>
+        <td><strong>ERD</strong></td>
+        <td>Entitas <code>persyaratan_beasiswa</code></td>
+        <td><span class="badge badge-warning">Sedang</span></td>
+        <td>Hapus salah satu oval atribut <code>nama_persyaratan</code> yang ganda.</td>
+      </tr>
+      <tr>
+        <td style="text-align: center;">3</td>
+        <td><strong>ERD</strong></td>
+        <td>Entitas <code>kategori_beasiswa</code></td>
+        <td><span class="badge badge-info">Minor</span></td>
+        <td>Hapus oval <code>diperbarui_oleh (FK)</code> (karena tabel MySQL tidak menggunakannya).</td>
+      </tr>
+      <tr>
+        <td style="text-align: center;">4</td>
+        <td><strong>DFD Level 1</strong></td>
+        <td>Aliran log Proses 2.0, 6.0, & 7.0</td>
+        <td><span class="badge badge-critical">Kritis</span></td>
+        <td>Balik arah panah data log: harus <strong>mengarah DARI proses MENUJU Data Store <code>Log Aktivitas</code></strong>.</td>
+      </tr>
+      <tr>
+        <td style="text-align: center;">5</td>
+        <td><strong>DFD Level 1</strong></td>
+        <td>Proses 6.0 (Pengaturan Situs)</td>
+        <td><span class="badge badge-warning">Sedang</span></td>
+        <td>Pindahkan relasi pemicu dari entitas <code>Administrator</code> ke <strong><code>Admin Utama</code></strong>.</td>
+      </tr>
+      <tr>
+        <td style="text-align: center;">6</td>
+        <td><strong>Flowchart 6</strong></td>
+        <td>Blok awal tampilan</td>
+        <td><span class="badge badge-critical">Kritis</span></td>
+        <td>Ubah teks <code>Display Dashboard Administrator</code> menjadi <strong><code>Display Dashboard Admin Utama</code></strong>.</td>
+      </tr>
+      <tr>
+        <td style="text-align: center;">7</td>
+        <td><strong>Flowchart 1</strong></td>
+        <td>Alur akhir detail beasiswa</td>
+        <td><span class="badge badge-info">Saran</span></td>
+        <td>Tambahkan keputusan untuk membuka <em>Tautan Pendaftaran Resmi Eksternal</em>.</td>
+      </tr>
+      <tr>
+        <td style="text-align: center;">8</td>
+        <td><strong>Mapping Chart</strong></td>
+        <td>Menu role Admin & Admin Utama</td>
+        <td><span class="badge badge-warning">Sedang</span></td>
+        <td>Pindahkan wewenang <em>Pengaturan Situs</em> dari Administrator biasa ke Admin Utama.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 7. PANDUAN SEMHAS -->
+  <h2>7. Panduan Menghadapi Pertanyaan Dosen Penguji Semhas</h2>
+  <div class="callout">
+    <strong>Pertanyaan Populer:</strong> <em>"Mengapa mahasiswa di sistem Anda tidak perlu mendaftar atau login akun?"</em><br>
+    <strong>Jawaban Rekomendasi:</strong><br>
+    <em>"Sistem ScholarHub POLINELA dirancang khusus sebagai portal agregator informasi beasiswa satu pintu yang terbuka dan ramah akses bagi seluruh sivitas akademika POLINELA tanpa hambatan login. Proses seleksi dan verifikasi berkas merupakan kewenangan penuh masing-masing mitra penyedia (seperti Kemendikbudristek, Djarum, BI, dll.), sehingga sistem ScholarHub menyediakan tautan langsung menuju portal pendaftaran resmi penyedia tersebut. Hal ini menjaga integritas data dan mencegah konflik validasi data pendaftar ganda."</em>
+  </div>
+
+  <div class="footer-note">
+    Dokumen ini dicetak secara otomatis sebagai laporan resmi asistensi pengembangan ScholarHub POLINELA. File Markdown asli tersimpan pada: <code>LAPORAN_AUDIT_DIAGRAM_SCHOLARHUB.md</code>
+  </div>
+
+</body>
+</html>

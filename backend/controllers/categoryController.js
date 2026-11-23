@@ -1,11 +1,12 @@
 const categoryModel = require('../models/categoryModel');
+const activityLogModel = require('../models/activityLogModel');
 const { successResponse, errorResponse } = require('../utils/responseHelper');
 
 const categoryController = {
   getAll: async (req, res, next) => {
     try {
       const categories = await categoryModel.findAll();
-      return successResponse(res, 'Categories retrieved successfully', categories);
+      return successResponse(res, 'Daftar kategori berhasil dimuat', categories);
     } catch (error) {
       next(error);
     }
@@ -14,11 +15,11 @@ const categoryController = {
   getById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const category = await categoryModel.findById(id);
+      const category = isNaN(id) ? await categoryModel.findBySlug(id) : await categoryModel.findById(id);
       if (!category) {
-        return errorResponse(res, 'Category not found', [], 404);
+        return errorResponse(res, 'Kategori tidak ditemukan', [], 404);
       }
-      return successResponse(res, 'Category retrieved successfully', category);
+      return successResponse(res, 'Data kategori berhasil dimuat', category);
     } catch (error) {
       next(error);
     }
@@ -26,10 +27,20 @@ const categoryController = {
 
   create: async (req, res, next) => {
     try {
-      const { nama_kategori, deskripsi } = req.body;
-      const insertId = await categoryModel.create({ nama_kategori, deskripsi });
+      const { nama_kategori, slug, deskripsi } = req.body;
+      const insertId = await categoryModel.create({ nama_kategori, slug, deskripsi });
       const newCategory = await categoryModel.findById(insertId);
-      return successResponse(res, 'Category created successfully', newCategory, 201);
+
+      // Record activity log
+      await activityLogModel.log({
+        pengguna_id: req.admin?.id,
+        aksi: 'tambah',
+        jenis_entitas: 'kategori_beasiswa',
+        id_entitas: insertId,
+        data_sesudah: { nama_kategori, slug: newCategory.slug },
+      });
+
+      return successResponse(res, 'Kategori beasiswa berhasil dibuat', newCategory, 201);
     } catch (error) {
       next(error);
     }
@@ -38,16 +49,27 @@ const categoryController = {
   update: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { nama_kategori, deskripsi } = req.body;
-      
+      const { nama_kategori, slug, deskripsi } = req.body;
+
       const exists = await categoryModel.findById(id);
       if (!exists) {
-        return errorResponse(res, 'Category not found', [], 404);
+        return errorResponse(res, 'Kategori tidak ditemukan', [], 404);
       }
 
-      await categoryModel.update(id, { nama_kategori, deskripsi });
+      await categoryModel.update(id, { nama_kategori, slug, deskripsi });
       const updatedCategory = await categoryModel.findById(id);
-      return successResponse(res, 'Category updated successfully', updatedCategory);
+
+      // Record activity log
+      await activityLogModel.log({
+        pengguna_id: req.admin?.id,
+        aksi: 'ubah',
+        jenis_entitas: 'kategori_beasiswa',
+        id_entitas: id,
+        data_sebelum: { nama_kategori: exists.nama_kategori },
+        data_sesudah: { nama_kategori: updatedCategory.nama_kategori },
+      });
+
+      return successResponse(res, 'Kategori beasiswa berhasil diperbarui', updatedCategory);
     } catch (error) {
       next(error);
     }
@@ -58,11 +80,31 @@ const categoryController = {
       const { id } = req.params;
       const exists = await categoryModel.findById(id);
       if (!exists) {
-        return errorResponse(res, 'Category not found', [], 404);
+        return errorResponse(res, 'Kategori tidak ditemukan', [], 404);
+      }
+
+      // Check if category has associated scholarships
+      if (exists.total_beasiswa > 0) {
+        return errorResponse(
+          res,
+          `Kategori '${exists.nama_kategori}' tidak dapat dihapus karena masih digunakan oleh ${exists.total_beasiswa} program beasiswa.`,
+          [],
+          400
+        );
       }
 
       await categoryModel.delete(id);
-      return successResponse(res, 'Category deleted successfully');
+
+      // Record activity log
+      await activityLogModel.log({
+        pengguna_id: req.admin?.id,
+        aksi: 'hapus',
+        jenis_entitas: 'kategori_beasiswa',
+        id_entitas: id,
+        data_sebelum: { nama_kategori: exists.nama_kategori },
+      });
+
+      return successResponse(res, 'Kategori beasiswa berhasil dihapus');
     } catch (error) {
       next(error);
     }

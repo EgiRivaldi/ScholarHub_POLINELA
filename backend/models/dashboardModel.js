@@ -1,53 +1,33 @@
-const { supabase } = require('../config/database');
+const { pool } = require('../config/database');
+const scholarshipModel = require('./scholarshipModel');
 
 const dashboardModel = {
   getStats: async () => {
-    const today = new Date().toISOString().split('T')[0];
-
-    const [scholarshipCount, categoryCount, providerCount, activeCount] = await Promise.all([
-      supabase.from('informasi_beasiswa').select('*', { count: 'exact', head: true }),
-      supabase.from('kategori_beasiswa').select('*', { count: 'exact', head: true }),
-      supabase.from('penyedia_beasiswa').select('*', { count: 'exact', head: true }),
-      supabase.from('informasi_beasiswa').select('*', { count: 'exact', head: true }).gte('tanggal_tutup', today)
+    const [[scholarshipRows], [categoryRows], [providerRows], [activeRows], [draftRows], [archiveRows]] = await Promise.all([
+      pool.query('SELECT COUNT(*) AS total FROM beasiswa'),
+      pool.query('SELECT COUNT(*) AS total FROM kategori_beasiswa'),
+      pool.query('SELECT COUNT(*) AS total FROM penyelenggara_beasiswa'),
+      pool.query("SELECT COUNT(*) AS total FROM beasiswa WHERE status_publikasi = 'terbit' AND (tanggal_tutup IS NULL OR tanggal_tutup >= CURDATE())"),
+      pool.query("SELECT COUNT(*) AS total FROM beasiswa WHERE status_publikasi = 'draf'"),
+      pool.query("SELECT COUNT(*) AS total FROM beasiswa WHERE status_publikasi = 'arsip'"),
     ]);
 
     return {
-      totalScholarships: scholarshipCount.count || 0,
-      totalCategories: categoryCount.count || 0,
-      totalProviders: providerCount.count || 0,
-      activeScholarships: activeCount.count || 0,
+      totalScholarships: Number(scholarshipRows[0]?.total || 0),
+      totalCategories: Number(categoryRows[0]?.total || 0),
+      totalProviders: Number(providerRows[0]?.total || 0),
+      activeScholarships: Number(activeRows[0]?.total || 0),
+      totalDrafts: Number(draftRows[0]?.total || 0),
+      totalArchived: Number(archiveRows[0]?.total || 0),
     };
   },
 
   getRecentScholarships: async (limit = 5) => {
-    const { data, error } = await supabase
-      .from('informasi_beasiswa')
-      .select(`
-        *,
-        kategori_beasiswa (nama_kategori),
-        penyedia_beasiswa (nama_penyedia, singkatan)
-      `)
-      .order('id', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
-
-    return data.map(item => {
-      const tutupDate = new Date(item.tanggal_tutup);
-      tutupDate.setHours(0,0,0,0);
-      
-      return {
-        ...item,
-        nama_kategori: item.kategori_beasiswa?.nama_kategori,
-        nama_penyedia: item.penyedia_beasiswa?.nama_penyedia,
-        penyedia_singkatan: item.penyedia_beasiswa?.singkatan,
-        status: tutupDate >= todayDate ? 'active' : 'closed',
-        kategori_beasiswa: undefined,
-        penyedia_beasiswa: undefined
-      };
+    return scholarshipModel.findAll({
+      limit,
+      page: 1,
+      sort: 'id',
+      order: 'DESC',
     });
   },
 };

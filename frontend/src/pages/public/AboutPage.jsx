@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Target,
@@ -11,6 +12,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import AnimatedBackground from '@/components/public/AnimatedBackground';
+import { getPublicSettings } from '@/services/api';
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -20,6 +22,13 @@ const fadeUp = {
 };
 
 export default function AboutPage() {
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => {
+    getPublicSettings()
+      .then((data) => setSettings(data || {}))
+      .catch((err) => console.error('Failed to load settings in about page:', err));
+  }, []);
   return (
     <div className="relative py-12 sm:py-16 min-h-screen">
       <AnimatedBackground />
@@ -36,7 +45,8 @@ export default function AboutPage() {
             POLINELA?
           </h1>
           <p className="text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            ScholarHub POLINELA adalah platform basis data beasiswa terpusat yang dirancang untuk membantu mahasiswa di Politeknik Negeri Lampung menjelajahi, membandingkan, dan memeriksa matriks persyaratan beasiswa dalam satu wadah.
+            {settings.tentang_website ||
+              'ScholarHub POLINELA adalah platform basis data beasiswa terpusat yang dirancang untuk membantu mahasiswa di Politeknik Negeri Lampung menjelajahi, membandingkan, dan memeriksa matriks persyaratan beasiswa dalam satu wadah.'}
           </p>
         </motion.div>
 
@@ -54,7 +64,7 @@ export default function AboutPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: index * 0.08 }}
-              className="flex flex-col items-center text-center p-6 rounded-2xl glass-ios hover:border-primary/20 transition-all duration-300"
+              className="flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-slate-200/80 hover:border-primary/40 shadow-xs transition-all"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 mb-4 shadow-sm">
                 <feature.icon className="h-5.5 w-5.5 text-primary" />

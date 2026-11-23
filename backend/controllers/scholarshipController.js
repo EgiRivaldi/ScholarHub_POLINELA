@@ -1,21 +1,44 @@
 const scholarshipModel = require('../models/scholarshipModel');
+const requirementModel = require('../models/requirementModel');
+const activityLogModel = require('../models/activityLogModel');
 const { successResponse, errorResponse, paginatedResponse } = require('../utils/responseHelper');
 const { deleteImageFile } = require('../utils/fileHelper');
 
 const scholarshipController = {
   getAll: async (req, res, next) => {
     try {
-      const { search, kategori_id, status, page = 1, limit = 10, sort = 'id', order = 'DESC' } = req.query;
+      const {
+        search,
+        kategori_id,
+        penyelenggara_id,
+        penyedia_id,
+        status_publikasi,
+        status_pendaftaran,
+        status,
+        page = 1,
+        limit = 10,
+        sort = 'id',
+        order = 'DESC',
+      } = req.query;
 
       const filters = {
         search,
-        kategori_id,
+        kategori_id: kategori_id ? parseInt(kategori_id, 10) : undefined,
+        penyelenggara_id: (penyelenggara_id || penyedia_id) ? parseInt(penyelenggara_id || penyedia_id, 10) : undefined,
+        status_pendaftaran,
         status,
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
+        page: Math.max(1, parseInt(page, 10) || 1),
+        limit: Math.max(1, parseInt(limit, 10) || 10),
         sort,
         order,
       };
+
+      // Strict Business Rule: Public visitors (without admin session) only see 'terbit' scholarships
+      if (!req.admin) {
+        filters.status_publikasi = 'terbit';
+      } else if (status_publikasi) {
+        filters.status_publikasi = status_publikasi;
+      }
 
       const total = await scholarshipModel.count(filters);
       const scholarships = await scholarshipModel.findAll(filters);
@@ -29,7 +52,7 @@ const scholarshipController = {
         totalPages,
       };
 
-      return paginatedResponse(res, 'Scholarships retrieved successfully', scholarships, pagination);
+      return paginatedResponse(res, 'Daftar beasiswa berhasil dimuat', scholarships, pagination);
     } catch (error) {
       next(error);
     }
@@ -38,11 +61,29 @@ const scholarshipController = {
   getById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const scholarship = await scholarshipModel.findById(id);
-      if (!scholarship) {
-        return errorResponse(res, 'Scholarship not found', [], 404);
+
+      // Allow lookup by numeric ID or by SEO slug
+      let scholarship = null;
+      if (/^\d+$/.test(id)) {
+        scholarship = await scholarshipModel.findById(id);
+      } else {
+        scholarship = await scholarshipModel.findBySlug(id);
       }
-      return successResponse(res, 'Scholarship retrieved successfully', scholarship);
+
+      if (!scholarship) {
+        return errorResponse(res, 'Informasi beasiswa tidak ditemukan', [], 404);
+      }
+
+      // Public visitors cannot see unpublished drafts
+      if (!req.admin && scholarship.status_publikasi !== 'terbit') {
+        return errorResponse(res, 'Informasi beasiswa tidak ditemukan atau belum diterbitkan', [], 404);
+      }
+
+      // Automatically attach requirements list for the detail page
+      const requirements = await requirementModel.findByScholarshipId(scholarship.id);
+      scholarship.persyaratan = requirements;
+
+      return successResponse(res, 'Detail beasiswa berhasil dimuat', scholarship);
     } catch (error) {
       next(error);
     }
@@ -50,24 +91,57 @@ const scholarshipController = {
 
   create: async (req, res, next) => {
     try {
-      const { nama_beasiswa, deskripsi, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id } = req.body;
-      const gambar = req.file ? `/uploads/${req.file.filename}` : null;
-
-      const insertId = await scholarshipModel.create({
+      const {
+        judul,
         nama_beasiswa,
-        deskripsi: deskripsi || null,
-        gambar,
+        slug,
+        ringkasan,
+        deskripsi,
         tanggal_buka,
         tanggal_tutup,
         url_pendaftaran,
+        url_sumber_resmi,
+        kategori_id,
+        penyelenggara_id,
+        penyedia_id,
+        status_publikasi,
+      } = req.body;
+
+      const finalJudul = judul || nama_beasiswa;
+      const finalPenyelenggaraId = penyelenggara_id || penyedia_id;
+      const gambar = req.file ? `/uploads/${req.file.filename}` : null;
+      const adminId = req.admin?.id || 1;
+
+      const insertId = await scholarshipModel.create({
+        judul: finalJudul,
+        slug,
+        ringkasan: ringkasan || null,
+        deskripsi: deskripsi || null,
+        url_gambar: gambar,
+        gambar,
+        tanggal_buka: tanggal_buka || null,
+        tanggal_tutup: tanggal_tutup || null,
+        url_pendaftaran: url_pendaftaran || null,
+        url_sumber_resmi: url_sumber_resmi || null,
         kategori_id: parseInt(kategori_id, 10),
-        penyedia_id: parseInt(penyedia_id, 10),
+        penyelenggara_id: parseInt(finalPenyelenggaraId, 10),
+        status_publikasi: status_publikasi || 'terbit',
+        dibuat_oleh: adminId,
       });
 
       const newScholarship = await scholarshipModel.findById(insertId);
-      return successResponse(res, 'Scholarship created successfully', newScholarship, 201);
+
+      // Record activity log
+      await activityLogModel.log({
+        pengguna_id: adminId,
+        aksi: 'tambah',
+        jenis_entitas: 'beasiswa',
+        id_entitas: insertId,
+        data_sesudah: { judul: finalJudul, status_publikasi: newScholarship.status_publikasi },
+      });
+
+      return successResponse(res, 'Program beasiswa berhasil dibuat', newScholarship, 201);
     } catch (error) {
-      // Clean up uploaded image if DB insertion fails
       if (req.file) {
         await deleteImageFile(`/uploads/${req.file.filename}`);
       }
@@ -78,43 +152,76 @@ const scholarshipController = {
   update: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { nama_beasiswa, deskripsi, tanggal_buka, tanggal_tutup, url_pendaftaran, kategori_id, penyedia_id } = req.body;
+      const {
+        judul,
+        nama_beasiswa,
+        slug,
+        ringkasan,
+        deskripsi,
+        tanggal_buka,
+        tanggal_tutup,
+        url_pendaftaran,
+        url_sumber_resmi,
+        kategori_id,
+        penyelenggara_id,
+        penyedia_id,
+        status_publikasi,
+      } = req.body;
 
       const existing = await scholarshipModel.findById(id);
       if (!existing) {
         if (req.file) {
           await deleteImageFile(`/uploads/${req.file.filename}`);
         }
-        return errorResponse(res, 'Scholarship not found', [], 404);
+        return errorResponse(res, 'Informasi beasiswa tidak ditemukan', [], 404);
       }
 
-      let gambar = existing.gambar;
+      let gambar = existing.url_gambar;
       let oldGambarToDelete = null;
       if (req.file) {
-        oldGambarToDelete = existing.gambar;
+        oldGambarToDelete = existing.url_gambar;
         gambar = `/uploads/${req.file.filename}`;
       }
 
+      const finalJudul = judul || nama_beasiswa;
+      const finalPenyelenggaraId = penyelenggara_id || penyedia_id;
+      const adminId = req.admin?.id || 1;
+
       await scholarshipModel.update(id, {
-        nama_beasiswa,
-        deskripsi: deskripsi || null,
+        judul: finalJudul,
+        slug,
+        ringkasan,
+        deskripsi,
+        url_gambar: gambar,
         gambar,
         tanggal_buka,
         tanggal_tutup,
         url_pendaftaran,
-        kategori_id: parseInt(kategori_id, 10),
-        penyedia_id: parseInt(penyedia_id, 10),
+        url_sumber_resmi,
+        kategori_id: kategori_id ? parseInt(kategori_id, 10) : undefined,
+        penyelenggara_id: finalPenyelenggaraId ? parseInt(finalPenyelenggaraId, 10) : undefined,
+        status_publikasi,
+        diperbarui_oleh: adminId,
       });
 
-      // Delete old image only after successful database update
       if (oldGambarToDelete) {
         await deleteImageFile(oldGambarToDelete);
       }
 
       const updated = await scholarshipModel.findById(id);
-      return successResponse(res, 'Scholarship updated successfully', updated);
+
+      // Record activity log
+      await activityLogModel.log({
+        pengguna_id: adminId,
+        aksi: 'ubah',
+        jenis_entitas: 'beasiswa',
+        id_entitas: id,
+        data_sebelum: { judul: existing.judul, status_publikasi: existing.status_publikasi },
+        data_sesudah: { judul: updated.judul, status_publikasi: updated.status_publikasi },
+      });
+
+      return successResponse(res, 'Program beasiswa berhasil diperbarui', updated);
     } catch (error) {
-      // Clean up uploaded image if DB update fails
       if (req.file) {
         await deleteImageFile(`/uploads/${req.file.filename}`);
       }
@@ -127,14 +234,25 @@ const scholarshipController = {
       const { id } = req.params;
       const existing = await scholarshipModel.findById(id);
       if (!existing) {
-        return errorResponse(res, 'Scholarship not found', [], 404);
+        return errorResponse(res, 'Informasi beasiswa tidak ditemukan', [], 404);
       }
 
-      // Delete image file first
-      await deleteImageFile(existing.gambar);
+      if (existing.url_gambar) {
+        await deleteImageFile(existing.url_gambar);
+      }
 
       await scholarshipModel.delete(id);
-      return successResponse(res, 'Scholarship deleted successfully');
+
+      // Record activity log
+      await activityLogModel.log({
+        pengguna_id: req.admin?.id,
+        aksi: 'hapus',
+        jenis_entitas: 'beasiswa',
+        id_entitas: id,
+        data_sebelum: { judul: existing.judul },
+      });
+
+      return successResponse(res, 'Program beasiswa berhasil dihapus');
     } catch (error) {
       next(error);
     }

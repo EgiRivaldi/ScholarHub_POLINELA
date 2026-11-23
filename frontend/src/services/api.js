@@ -186,6 +186,69 @@ export const deleteAdmin = async (id) => {
   return response.data;
 };
 
+export const toggleAdminStatus = async (id) => {
+  const response = await api.patch(`/admins/${id}/status`);
+  return response.data?.data || null;
+};
+
+// --- Activity Logs ---
+export const getActivityLogs = async (params = {}) => {
+  const response = await api.get('/logs', { params });
+  return response.data || { data: [], pagination: {} };
+};
+
+// --- Announcements ---
+export const getPublicAnnouncements = async () => {
+  const response = await api.get('/announcements/public');
+  return response.data?.data || [];
+};
+
+export const getAnnouncements = async () => {
+  const response = await api.get('/announcements');
+  return response.data?.data || [];
+};
+
+export const getAnnouncementById = async (id) => {
+  const response = await api.get(`/announcements/${id}`);
+  return response.data?.data || null;
+};
+
+export const createAnnouncement = async (data) => {
+  const response = await api.post('/announcements', data);
+  return response.data?.data || null;
+};
+
+export const updateAnnouncement = async (id, data) => {
+  const response = await api.put(`/announcements/${id}`, data);
+  return response.data?.data || null;
+};
+
+export const deleteAnnouncement = async (id) => {
+  const response = await api.delete(`/announcements/${id}`);
+  return response.data;
+};
+
+// --- Site Settings ---
+export const getPublicSettings = async () => {
+  const response = await api.get('/settings/public');
+  return response.data?.data || {};
+};
+
+export const getSettings = async () => {
+  const response = await api.get('/settings');
+  return response.data?.data || [];
+};
+
+export const updateSettings = async (settings) => {
+  const response = await api.put('/settings/bulk', { settings });
+  return response.data?.data || null;
+};
+
+export const updateSettingByKey = async (key, value) => {
+  const response = await api.put(`/settings/${key}`, { nilai_pengaturan: value });
+  return response.data?.data || null;
+};
+
 // --- Dashboard ---
 export const getDashboardStats = async () => {
   const response = await api.get('/dashboard/stats');

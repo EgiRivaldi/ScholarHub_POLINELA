@@ -4,14 +4,23 @@ import { Search, Menu, X, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useMobile } from '@/hooks/useMobile';
+import AnnouncementTicker from '@/components/public/AnnouncementTicker';
+import { getPublicSettings } from '@/services/api';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [siteSettings, setSiteSettings] = useState({});
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMobile();
+
+  useEffect(() => {
+    getPublicSettings()
+      .then((data) => setSiteSettings(data || {}))
+      .catch((e) => console.error('Failed to load settings in navbar:', e));
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -39,49 +48,41 @@ export default function Navbar() {
   ];
 
   return (
-    <header
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-6 lg:px-8',
-        isScrolled ? 'py-3.5' : 'py-5'
-      )}
-    >
-      <nav
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+      <AnnouncementTicker />
+      <div
         className={cn(
-          'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 rounded-2xl transition-all duration-300 border',
-          isScrolled
-            ? 'glass-ios shadow-[0_12px_32px_-4px_rgba(0,0,0,0.04)] border-white/50'
-            : 'bg-white/20 backdrop-blur-[6px] border-white/30 shadow-sm'
+          'transition-all duration-300 px-4 sm:px-6 lg:px-8',
+          isScrolled ? 'py-3' : 'py-4'
         )}
       >
-        <div className="flex h-14 items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200/50 shadow-sm group-hover:scale-105 transition-transform duration-300 shrink-0">
-              <svg className="h-8.5 w-8.5" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#6D28D9" />
-                    <stop offset="100%" stopColor="#8B5CF6" />
-                  </linearGradient>
-                  <linearGradient id="limeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#84CC16" />
-                    <stop offset="100%" stopColor="#A3E635" />
-                  </linearGradient>
-                </defs>
-                <path d="M50 15 L82 32 L50 49 L18 32 Z" fill="url(#purpleGrad)" />
-                <path d="M32 38 V48 C32 58 68 58 68 48 V38" fill="url(#purpleGrad)" opacity="0.9" />
-                <path d="M50 32 C50 32 74 34 74 46 C74 58 46 55 46 67 C46 78 74 78 74 78" stroke="url(#limeGrad)" strokeWidth="8" strokeLinecap="round" fill="none" />
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[14px] font-black text-slate-800 leading-tight tracking-tight group-hover:text-primary transition-colors duration-300">
-                ScholarHub
-              </span>
-              <span className="text-[8px] font-black text-slate-400 leading-none tracking-wider uppercase">
-                POLINELA
-              </span>
-            </div>
-          </Link>
+        <nav
+          className={cn(
+            'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 rounded-2xl transition-all duration-300 border',
+            isScrolled
+              ? 'glass-ios shadow-[0_12px_32px_-4px_rgba(0,0,0,0.04)] border-white/50'
+              : 'bg-white/20 backdrop-blur-[6px] border-white/30 shadow-sm'
+          )}
+        >
+          <div className="flex h-14 items-center justify-between gap-4">
+            {/* Official POLINELA Logo */}
+            <Link to="/" className="flex items-center gap-3 shrink-0 group">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-xs group-hover:scale-105 group-hover:border-primary/40 transition-all duration-300 shrink-0 p-1">
+                <img
+                  src={siteSettings.url_logo || '/images/polinela-logo.png'}
+                  alt="Logo Politeknik Negeri Lampung"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[15px] font-black text-slate-900 leading-tight tracking-tight group-hover:text-primary transition-colors duration-300">
+                  ScholarHub
+                </span>
+                <span className="text-[9px] font-extrabold text-slate-400 leading-none tracking-widest uppercase mt-0.5">
+                  POLINELA
+                </span>
+              </div>
+            </Link>
 
           {/* Center Search - Desktop */}
           {!isMobile && (
@@ -189,6 +190,7 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </header>
   );
 }

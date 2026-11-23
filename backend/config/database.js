@@ -1,39 +1,36 @@
-const { createClient } = require('@supabase/supabase-js');
+const mysql = require('mysql2/promise');
 const logger = require('../utils/logger');
 require('dotenv').config();
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  logger.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT, 10) || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'beasiswa_polinela',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+  dateStrings: true,
 });
 
 const testConnection = async () => {
   try {
-    const { data, error } = await supabase.from('akun_admin').select('id').limit(1);
-    
-    if (error) {
-      if (error.code === '42P01') { 
-        logger.info('Supabase API connected successfully (tables not created yet)');
-        return true;
-      }
-      throw error;
-    }
-    
-    logger.info('Supabase API connected successfully');
+    const connection = await pool.getConnection();
+    await connection.query('SELECT 1 + 1 AS result');
+    connection.release();
+    logger.info(`MySQL connected successfully to database: ${process.env.DB_NAME || 'beasiswa_polinela'}`);
     return true;
   } catch (error) {
-    logger.error(`Supabase connection failed: ${error.message || error}`);
+    logger.error(`MySQL connection failed: ${error.message}`);
     return false;
   }
 };
 
-module.exports = { supabase, testConnection };
+module.exports = {
+  pool,
+  db: pool,
+  testConnection,
+};
