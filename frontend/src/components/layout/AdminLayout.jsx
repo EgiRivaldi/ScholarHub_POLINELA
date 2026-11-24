@@ -49,8 +49,7 @@ export default function AdminLayout() {
   const title = pageTitles[location.pathname] || 'Admin';
 
   return (
-    <div className="relative min-h-screen bg-slate-50/20 overflow-hidden">
-      <AnimatedBackground variant="admin" />
+    <div className="relative min-h-screen bg-slate-100/80 overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="lg:pl-[260px]">

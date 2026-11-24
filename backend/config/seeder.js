@@ -14,22 +14,23 @@ const seed = async () => {
   }
 
   try {
-    // 1. Seed pengguna (admin_utama & admin)
-    const hashUtama = await bcrypt.hash('admin123', 10);
+    // 1. Seed pengguna (Single unified admin account)
     const hashAdmin = await bcrypt.hash('admin123', 10);
 
     await pool.query(
       `INSERT INTO pengguna (id, nama_pengguna, hash_kata_sandi, nama_lengkap, peran, aktif)
        VALUES 
-       (1, 'admin_utama', ?, 'Super Administrator POLINELA', 'admin_utama', 1),
-       (2, 'admin', ?, 'Administrator Konten POLINELA', 'admin', 1)
+       (1, 'admin', ?, 'Administrator Sistem Informasi Beasiswa POLINELA', 'admin_utama', 1)
        ON DUPLICATE KEY UPDATE 
+         nama_pengguna = VALUES(nama_pengguna),
+         hash_kata_sandi = VALUES(hash_kata_sandi),
          nama_lengkap = VALUES(nama_lengkap),
          peran = VALUES(peran),
          aktif = VALUES(aktif)`,
-      [hashUtama, hashAdmin]
+      [hashAdmin]
     );
-    logger.info('Users seeded (admin_utama & admin)');
+    await pool.query(`DELETE FROM pengguna WHERE id > 1 AND nama_pengguna IN ('admin', 'admin_utama')`);
+    logger.info('Single admin user seeded (admin / admin123)');
 
     // 2. Seed kategori_beasiswa
     const categories = [

@@ -6,22 +6,22 @@
    ======================================== */
 
 @theme inline {
-  --color-primary: #6D28D9;
-  --color-primary-light: #8B5CF6;
-  --color-primary-dark: #5B21B6;
-  --color-primary-50: #F5F3FF;
-  --color-primary-100: #EDE9FE;
-  --color-primary-200: #DDD6FE;
-  --color-primary-500: #6D28D9;
-  --color-primary-600: #7C3AED;
-  --color-primary-700: #5B21B6;
+  --color-primary: #00478f;
+  --color-primary-light: #005bb5;
+  --color-primary-dark: #003366;
+  --color-primary-50: #f0f6fc;
+  --color-primary-100: #e0edfa;
+  --color-primary-200: #b8d8f4;
+  --color-primary-500: #00478f;
+  --color-primary-600: #003d7a;
+  --color-primary-700: #003366;
   --color-primary-foreground: #ffffff;
 
-  --color-secondary: #059669;
-  --color-secondary-light: #10B981;
-  --color-secondary-dark: #047857;
-  --color-secondary-50: #ECFDF5;
-  --color-secondary-foreground: #065F46;
+  --color-secondary: #15803d;
+  --color-secondary-light: #16a34a;
+  --color-secondary-dark: #166534;
+  --color-secondary-50: #f0fdf4;
+  --color-secondary-foreground: #14532d;
 
   /* Neutral clean light background */
   --color-background: #F8FAFC;
@@ -35,8 +35,8 @@
   --color-text-secondary: #475569;
   --color-text-tertiary: #64748B;
 
-  --color-success: #10B981;
-  --color-success-light: #ECFDF5;
+  --color-success: #15803d;
+  --color-success-light: #f0fdf4;
   --color-warning: #F59E0B;
   --color-warning-light: #FFFBEB;
   --color-danger: #EF4444;
@@ -46,10 +46,10 @@
   --color-card-foreground: #0F172A;
   --color-muted: #F8FAFC;
   --color-muted-foreground: #64748B;
-  --color-accent: #F5F3FF;
-  --color-accent-foreground: #6D28D9;
+  --color-accent: #f0f6fc;
+  --color-accent-foreground: #00478f;
   --color-input: #FFFFFF;
-  --color-ring: #6D28D9;
+  --color-ring: #00478f;
 
   /* Slate scales for high-contrast light theme */
   --color-slate-50: #F8FAFC;
@@ -218,4 +218,190 @@ body {
 .animate-footer-scroll-marquee {
   animation: footer-scroll-marquee 35s linear infinite;
 }
+
+/* ========================================
+   Glass Orb Category Button & Smooth Hover
+   ======================================== */
+.glass-orb-button {
+  transition:
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.glass-orb-button:hover {
+  transform: translateY(-7px) scale(1.03);
+}
+
+.glass-orb-button:active {
+  transform: translateY(-2px) scale(0.96);
+  transition-duration: 0.12s;
+}
+
+.glass-orb-logo {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.35s ease;
+}
+
+.glass-orb-button:hover .glass-orb-logo {
+  transform: scale(1.13) translateY(-2px);
+  filter: drop-shadow(0 10px 14px rgba(0, 71, 143, 0.22));
+}
+
+.glass-shine-sweep::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.8) 50%,
+    transparent 80%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.glass-orb-button:hover .glass-shine-sweep::before {
+  transform: translateX(130%);
+}
+
+/* ========================================
+   Interactive Scholarship Card & Announcement Hover/Press
+   (Option 3: Slide Kanan + Bar Biru Samping + Tombol Melebar)
+   ======================================== */
+.scholarship-card-interactive {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+.scholarship-card-interactive::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: #00478f;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scholarship-card-interactive:hover::after {
+  transform: scaleY(1);
+}
+
+.scholarship-card-interactive:hover {
+  transform: translateX(6px);
+  border-color: #00478f;
+  box-shadow:
+    -6px 14px 30px -8px rgba(0, 71, 143, 0.2),
+    0 4px 12px -2px rgba(15, 23, 42, 0.05);
+}
+
+.scholarship-card-interactive:active {
+  transform: translateX(2px) scale(0.985);
+  transition-duration: 0.1s;
+}
+
+.scholarship-card-interactive .card-logo-box {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.scholarship-card-interactive:hover .card-logo-box {
+  transform: scale(1.06);
+  background-color: #f0f6fc;
+  border-color: rgba(0, 71, 143, 0.35);
+}
+
+.scholarship-card-interactive .card-detail-btn {
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scholarship-card-interactive:hover .card-detail-btn {
+  padding-left: 1.35rem;
+  padding-right: 1.35rem;
+  background-color: #002b5c;
+  box-shadow: 0 6px 15px -3px rgba(0, 43, 92, 0.35);
+}
+
+.scholarship-card-interactive .card-detail-btn:active {
+  transform: scale(0.94);
+  transition-duration: 0.08s;
+}
+
+.announcement-item-interactive {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    padding-left 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease;
+}
+
+.announcement-item-interactive::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #15803d;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.announcement-item-interactive:hover {
+  transform: translateX(5px);
+  background-color: #f0f6fc;
+  border-color: #bfdbfe;
+  padding-left: 1rem;
+}
+
+.announcement-item-interactive:hover::before {
+  transform: scaleY(1);
+}
+
+.announcement-item-interactive:active {
+  transform: translateX(2px) scale(0.985);
+  transition-duration: 0.08s;
+}
+
+.announcement-title-underline {
+  background-image: linear-gradient(#00478f, #00478f);
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  padding-bottom: 2px;
+  transition:
+    background-size 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.25s ease;
+}
+
+.announcement-item-interactive:hover .announcement-title-underline {
+  background-size: 100% 2px;
+  color: #00478f;
+}
+
+
 

@@ -132,7 +132,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-wider mt-8">
-          © {new Date().getFullYear()} ScholarHub POLINELA
+          © {new Date().getFullYear()} Sistem Informasi Beasiswa POLINELA
         </p>
       </motion.div>
     </div>

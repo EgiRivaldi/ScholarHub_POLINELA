@@ -18,7 +18,13 @@ import CategoryCard from '@/components/public/CategoryCard';
 import ScholarshipGrid from '@/components/public/ScholarshipGrid';
 import AnimatedBackground from '@/components/public/AnimatedBackground';
 import MagneticButton from '@/components/ui/MagneticButton';
-import { getScholarships, getCategories, getProviders, getPublicSettings } from '@/services/api';
+import {
+  getScholarships,
+  getCategories,
+  getProviders,
+  getPublicSettings,
+  getPublicAnnouncements,
+} from '@/services/api';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export default function HomePage() {
@@ -31,6 +37,7 @@ export default function HomePage() {
   const [sortOption, setSortOption] = useState('terbaru');
   const [scholarships, setScholarships] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [siteSettings, setSiteSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -43,15 +50,18 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [scholarshipsData, categoriesData, providersData, settingsData] = await Promise.all([
-          getScholarships({ limit: 100 }),
-          getCategories(),
-          getProviders(),
-          getPublicSettings().catch(() => ({})),
-        ]);
+        const [scholarshipsData, categoriesData, providersData, settingsData, announcementsData] =
+          await Promise.all([
+            getScholarships({ limit: 100 }),
+            getCategories(),
+            getProviders(),
+            getPublicSettings().catch(() => ({})),
+            getPublicAnnouncements().catch(() => []),
+          ]);
         setScholarships(scholarshipsData);
         setCategories(categoriesData);
         setSiteSettings(settingsData || {});
+        setAnnouncements(announcementsData || []);
         setStats({
           scholarshipsCount: scholarshipsData.length,
           categoriesCount: categoriesData.length,
@@ -144,8 +154,8 @@ export default function HomePage() {
 
   const faqItems = [
     {
-      q: 'Bagaimana cara mendaftar beasiswa di ScholarHub POLINELA?',
-      a: 'ScholarHub POLINELA adalah portal informasi resmi. Anda dapat membuka kartu beasiswa untuk membaca seluruh persyaratan dan jadwal pendaftaran, kemudian klik tombol "Kunjungi Situs Resmi" untuk mendaftar langsung pada website resmi penyelenggara program.',
+      q: 'Bagaimana cara mendaftar beasiswa di Sistem Informasi Beasiswa POLINELA?',
+      a: 'Sistem Informasi Beasiswa POLINELA adalah portal informasi resmi. Anda dapat membuka kartu beasiswa untuk membaca seluruh persyaratan dan jadwal pendaftaran, kemudian klik tombol "Kunjungi Situs Resmi" untuk mendaftar langsung pada website resmi penyelenggara program.',
     },
     {
       q: 'Apakah mahasiswa perlu membuat akun untuk melihat informasi beasiswa?',
@@ -165,229 +175,102 @@ export default function HomePage() {
     <div className="relative min-h-screen bg-slate-50 text-slate-900">
       <AnimatedBackground />
 
-      {/* Hero Section */}
+      {/* Hero Section: Daftar Program Beasiswa & Daftar Kartu + Pengumuman di Samping */}
       <Hero
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        categories={categories}
+        scholarships={filteredScholarships}
+        announcements={announcements}
+        loading={loading}
+        isFiltering={isFiltering}
+        onResetFilters={handleResetFilters}
         stats={stats}
         settings={siteSettings}
       />
 
-      <div id="scholarships" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-        {/* Categories Section */}
-        <section>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
-                Jelajahi Berdasarkan Kategori
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10 space-y-12">
+        {/* FAQ Section: Sesuai Referensi Gambar (Header Tengah & Kartu Bernomor Halus) */}
+        <section className="py-12 border-t border-slate-200">
+          <div className="max-w-4xl mx-auto">
+            {/* Header: BANTUAN & INFORMASI Pill + Title Tengah (Persis Gambar Referensi 1 & 3) */}
+            <div className="flex flex-col items-center text-center mb-10">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-[#00478f] text-xs font-black tracking-wider uppercase mb-3 shadow-2xs">
+                BANTUAN & INFORMASI
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Pertanyaan yang Sering Diajukan
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Pilih kategori untuk memfilter beasiswa sesuai jenis mitra penyelenggara.
-              </p>
             </div>
-            {selectedCategory && (
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className="text-xs font-bold text-primary hover:underline mt-2 sm:mt-0 cursor-pointer"
-              >
-                Hapus Filter Kategori ({selectedCategory.nama_kategori})
-              </button>
-            )}
-          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            {categories.map((category) => (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                isSelected={selectedCategory?.id === category.id}
-                onClick={handleCategoryClick}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Scholarships List & Filter Bar Section */}
-        <section className="space-y-6">
-          {/* Header & Controls */}
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-                  <span>Daftar Program Beasiswa</span>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                    {filteredScholarships.length}
-                  </span>
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Informasi program beasiswa aktif, segera dibuka, dan arsip referensi.
-                </p>
-              </div>
-
-              {/* Status Magnetic Pills */}
-              <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-full border border-slate-200/90 shadow-2xs">
-                {[
-                  { id: 'semua', label: 'Semua Status' },
-                  { id: 'dibuka', label: 'Dibuka' },
-                  { id: 'belum_dibuka', label: 'Segera' },
-                  { id: 'ditutup', label: 'Ditutup' },
-                ].map((s) => (
-                  <MagneticButton
-                    key={s.id}
-                    onClick={() => setSelectedStatus(s.id)}
-                    strength={0.25}
-                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                      selectedStatus === s.id
-                        ? 'bg-white text-primary shadow-xs border border-purple-200/80'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+            {/* Accordion Cards (Persis Gambar Referensi 2) */}
+            <div className="space-y-4">
+              {faqItems.map((faq, index) => {
+                const isOpen = Boolean(faqOpen[index]);
+                const numLabel = String(index + 1).padStart(2, '0');
+                return (
+                  <div
+                    key={index}
+                    onClick={() => toggleFaq(index)}
+                    className={`rounded-2xl border transition-all duration-300 ease-out cursor-pointer overflow-hidden select-none ${
+                      isOpen
+                        ? 'bg-white border-2 border-[#00478f] shadow-lg shadow-blue-900/5'
+                        : 'bg-white border-2 border-slate-100 hover:border-blue-200 hover:shadow-md'
                     }`}
                   >
-                    {s.label}
-                  </MagneticButton>
-                ))}
-              </div>
-            </div>
+                    <div className="p-5 sm:p-6 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <span
+                          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center shrink-0 transition-all duration-300 ${
+                            isOpen
+                              ? 'bg-[#00478f] text-white shadow-xs'
+                              : 'bg-blue-50 text-[#00478f]'
+                          }`}
+                        >
+                          {numLabel}
+                        </span>
+                        <span
+                          className={`text-sm sm:text-base font-extrabold transition-colors duration-300 ${
+                            isOpen ? 'text-[#00478f]' : 'text-slate-800'
+                          }`}
+                        >
+                          {faq.q}
+                        </span>
+                      </div>
 
-            {/* Sub-controls: Search & Sort */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter nama atau syarat..."
-                  className="w-full h-9 pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span className="text-xs text-slate-500 font-medium hidden sm:inline">Urutkan:</span>
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer w-full sm:w-auto"
-                >
-                  <option value="terbaru">Terbaru Ditambahkan</option>
-                  <option value="deadline">Batas Waktu Terdekat</option>
-                  <option value="az">Nama Beasiswa (A-Z)</option>
-                </select>
-
-                {isFiltering && (
-                  <button
-                    onClick={handleResetFilters}
-                    className="inline-flex items-center gap-1 h-9 px-3 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors cursor-pointer shrink-0"
-                    title="Reset Filter"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Reset</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Grid Cards */}
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div key={n} className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 animate-pulse">
-                  <div className="h-44 bg-slate-100 rounded-xl" />
-                  <div className="h-4 bg-slate-100 rounded w-1/3" />
-                  <div className="h-5 bg-slate-100 rounded w-4/5" />
-                  <div className="h-4 bg-slate-100 rounded w-full" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <ScholarshipGrid scholarships={filteredScholarships} />
-          )}
-        </section>
-
-        {/* How It Works Section */}
-        <section className="py-10 border-t border-slate-200">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-              Panduan Mahasiswa
-            </span>
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight mt-3">
-              3 Langkah Mudah Menemukan Beasiswa
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Cara efisien mendapatkan informasi beasiswa di Politeknik Negeri Lampung.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              {
-                step: '01',
-                title: 'Jelajahi & Cari',
-                desc: 'Gunakan fitur pencarian dan filter status untuk menemukan program beasiswa yang sesuai dengan kriteria studi Anda.',
-              },
-              {
-                step: '02',
-                title: 'Periksa Matriks Persyaratan',
-                desc: 'Buka detail program untuk melihat daftar persyaratan wajib, dokumen administratif, serta tenggat jadwal pembukaan.',
-              },
-              {
-                step: '03',
-                title: 'Akses Pendaftaran Resmi',
-                desc: 'Klik tautan eksternal resmi untuk mendaftar langsung pada portal instansi atau yayasan mitra beasiswa.',
-              },
-            ].map((item) => (
-              <div
-                key={item.step}
-                className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between"
-              >
-                <div>
-                  <span className="text-2xl font-black text-primary/30 block mb-2">{item.step}</span>
-                  <h3 className="text-base font-bold text-slate-800 mb-2">{item.title}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-10 border-t border-slate-200">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-              Bantuan & Informasi
-            </span>
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight mt-3">
-              Pertanyaan yang Sering Diajukan
-            </h2>
-          </div>
-
-          <div className="max-w-3xl mx-auto space-y-3">
-            {faqItems.map((faq, index) => {
-              const isOpen = Boolean(faqOpen[index]);
-              return (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden transition-all"
-                >
-                  <button
-                    onClick={() => toggleFaq(index)}
-                    className="w-full flex items-center justify-between p-4 sm:p-5 text-left text-sm font-bold text-slate-800 hover:text-primary transition-colors cursor-pointer"
-                  >
-                    <span>{faq.q}</span>
-                    <ChevronDown
-                      className={`h-4 w-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-primary' : ''
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <div className="px-5 pb-5 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                      {faq.a}
+                      <span
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ease-out ${
+                          isOpen
+                            ? 'bg-[#00478f] text-white rotate-180 shadow-xs'
+                            : 'bg-slate-100 text-slate-400 hover:text-slate-600'
+                        }`}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </span>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+
+                    {/* Smooth Expand/Collapse with CSS Grid */}
+                    <div
+                      className={`grid transition-[grid-template-rows,opacity] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                        isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="px-6 pb-6 pt-2 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 mt-1 pl-18 sm:pl-20">
+                          {faq.a}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
       </div>

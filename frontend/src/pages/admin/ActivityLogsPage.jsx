@@ -30,7 +30,7 @@ export default function ActivityLogsPage() {
     currentUser = storedUser ? JSON.parse(storedUser) : null;
   } catch (e) {}
 
-  const isSuperAdmin = currentUser?.peran === 'admin_utama' || currentUser?.role === 'admin_utama';
+  const isSuperAdmin = true;
 
   const fetchLogs = async (page = 1) => {
     setIsLoading(true);
@@ -95,7 +95,7 @@ export default function ActivityLogsPage() {
       case 'masuk':
       case 'login':
         return (
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
             MASUK
           </span>
         );

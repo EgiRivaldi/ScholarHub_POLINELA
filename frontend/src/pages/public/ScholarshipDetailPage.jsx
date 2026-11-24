@@ -122,7 +122,7 @@ export default function ScholarshipDetailPage() {
                   <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
                     <Building2 className="h-12 w-12 text-primary/30" />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      ScholarHub POLINELA
+                      Sistem Informasi Beasiswa POLINELA
                     </span>
                   </div>
                 )}

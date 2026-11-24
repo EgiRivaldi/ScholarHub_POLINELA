@@ -58,16 +58,14 @@ export default function Navbar() {
       >
         <nav
           className={cn(
-            'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 rounded-2xl transition-all duration-300 border',
-            isScrolled
-              ? 'glass-ios shadow-[0_12px_32px_-4px_rgba(0,0,0,0.04)] border-white/50'
-              : 'bg-white/20 backdrop-blur-[6px] border-white/30 shadow-sm'
+            'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 rounded-xl transition-all duration-200 border bg-white border-slate-200',
+            isScrolled ? 'shadow-md' : 'shadow-sm'
           )}
         >
           <div className="flex h-14 items-center justify-between gap-4">
             {/* Official POLINELA Logo */}
             <Link to="/" className="flex items-center gap-3 shrink-0 group">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-xs group-hover:scale-105 group-hover:border-primary/40 transition-all duration-300 shrink-0 p-1">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-slate-200 group-hover:border-[#00478f] transition-colors shrink-0 p-1">
                 <img
                   src={siteSettings.url_logo || '/images/polinela-logo.png'}
                   alt="Logo Politeknik Negeri Lampung"
@@ -75,10 +73,10 @@ export default function Navbar() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-[15px] font-black text-slate-900 leading-tight tracking-tight group-hover:text-primary transition-colors duration-300">
-                  ScholarHub
+                <span className="text-[14px] sm:text-[15px] font-black text-[#00478f] leading-tight tracking-tight">
+                  Sistem Informasi Beasiswa
                 </span>
-                <span className="text-[9px] font-extrabold text-slate-400 leading-none tracking-widest uppercase mt-0.5">
+                <span className="text-[9px] font-extrabold text-slate-500 leading-none tracking-widest uppercase mt-0.5">
                   POLINELA
                 </span>
               </div>
@@ -88,13 +86,13 @@ export default function Navbar() {
           {!isMobile && (
             <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4">
               <div className="relative group">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 group-focus-within:text-primary transition-colors duration-200" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 group-focus-within:text-[#00478f] transition-colors duration-200" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari beasiswa..."
-                  className="w-full h-9 pl-9.5 pr-4 rounded-xl bg-white/5 border border-white/10 text-xs text-text placeholder:text-text-secondary focus:outline-none focus:bg-white/10 focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all duration-200"
+                  className="w-full h-9 pl-9.5 pr-4 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#00478f]/20 focus:border-[#00478f] transition-all duration-200"
                 />
               </div>
             </form>
@@ -112,10 +110,10 @@ export default function Navbar() {
                       key={link.path}
                       to={link.path}
                       className={cn(
-                        'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 border border-transparent',
+                        'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200',
                         active
-                          ? 'text-primary bg-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_4px_rgba(0,0,0,0.02)] border-white/40'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-white/30 hover:border-white/20'
+                          ? 'text-[#00478f] bg-blue-50/80 border border-blue-200/80'
+                          : 'text-slate-600 hover:text-[#00478f] hover:bg-slate-50'
                       )}
                     >
                       {link.label}
@@ -124,15 +122,6 @@ export default function Navbar() {
                 })}
               </div>
             )}
-
-            {/* Login Button */}
-            <Link
-              to="/login"
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold text-[#6D28D9] bg-white/70 border border-white/80 hover:bg-[#6D28D9] hover:text-white hover:border-[#6D28D9] shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-lg hover:shadow-[#6D28D9]/20 transition-all duration-300"
-            >
-              <LogIn className="h-3.5 w-3.5" />
-              {!isMobile && <span>Masuk</span>}
-            </Link>
 
             {/* Hamburger - Mobile */}
             {isMobile && (
