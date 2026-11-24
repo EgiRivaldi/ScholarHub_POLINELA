@@ -1,7 +1,7 @@
 import ScholarshipCard from './ScholarshipCard';
 import { SearchX } from 'lucide-react';
 
-export default function ScholarshipGrid({ scholarships }) {
+export default function ScholarshipGrid({ scholarships, columns = 3 }) {
   if (!scholarships || scholarships.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
@@ -18,8 +18,13 @@ export default function ScholarshipGrid({ scholarships }) {
     );
   }
 
+  const gridColsClass =
+    columns === 2
+      ? 'grid-cols-1 md:grid-cols-2'
+      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+    <div className={`grid ${gridColsClass} gap-5 sm:gap-6`}>
       {scholarships.map((scholarship, index) => (
         <ScholarshipCard
           key={scholarship.id}

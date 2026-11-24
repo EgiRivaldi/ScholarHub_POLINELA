@@ -39,14 +39,7 @@ export default function Sidebar({ isOpen, onClose }) {
     currentUser = storedUser ? JSON.parse(storedUser) : null;
   } catch (e) {}
 
-  const isSuperAdmin = currentUser?.peran === 'admin_utama' || currentUser?.role === 'admin_utama';
-
-  const visibleMenuItems = menuItems.filter((item) => {
-    if (item.superAdminOnly && !isSuperAdmin) {
-      return false;
-    }
-    return true;
-  });
+  const visibleMenuItems = menuItems;
 
   const handleLogout = async () => {
     try {
@@ -66,11 +59,11 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-white border-r border-slate-200/80">
+    <div className="flex h-full flex-col bg-[#002b5c] text-white border-r border-blue-900/40 select-none">
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-5 border-b border-slate-100">
-        <Link to="/admin" className="flex items-center gap-2.5 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-2xs group-hover:scale-105 transition-transform duration-300 shrink-0 p-1">
+      <div className="flex h-16 items-center justify-between px-5 border-b border-white/10">
+        <Link to="/admin" className="flex items-center gap-3 group">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-white/20 shadow-sm group-hover:scale-105 transition-transform duration-300 shrink-0 p-1">
             <img
               src="/images/polinela-logo.png"
               alt="Logo POLINELA"
@@ -78,8 +71,10 @@ export default function Sidebar({ isOpen, onClose }) {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-[13px] font-black text-slate-900 leading-tight group-hover:text-primary transition-colors duration-300">ScholarHub</span>
-            <span className="text-[8px] font-bold text-slate-400 leading-none tracking-widest uppercase">
+            <span className="text-[12px] font-black text-white leading-tight group-hover:text-amber-300 transition-colors duration-200">
+              Sistem Informasi Beasiswa
+            </span>
+            <span className="text-[8.5px] font-extrabold text-amber-300 leading-none tracking-widest uppercase mt-1">
               POLINELA ADMIN
             </span>
           </div>
@@ -88,7 +83,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Close button - Mobile */}
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden transition-colors"
+          className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 lg:hidden transition-colors"
           aria-label="Close sidebar"
         >
           <X className="h-5 w-5" />
@@ -108,28 +103,28 @@ export default function Sidebar({ isOpen, onClose }) {
               className={cn(
                 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 relative border',
                 active
-                  ? 'text-primary bg-purple-50 border-purple-200/80 shadow-xs'
-                  : 'text-slate-600 border-transparent hover:bg-slate-50 hover:border-slate-200/60 hover:text-slate-900'
+                  ? 'text-white bg-[#00478f] border-blue-400/35 shadow-sm font-extrabold'
+                  : 'text-blue-100/80 border-transparent hover:bg-white/10 hover:text-white'
               )}
             >
+              <Icon className={cn('h-[18px] w-[18px] shrink-0', active ? 'text-amber-300' : 'text-blue-200/80')} />
+              <span className="truncate">{item.label}</span>
               {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-[#6D28D9]" />
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-amber-300 shadow-xs shrink-0" />
               )}
-              <Icon className="h-[18px] w-[18px] shrink-0" />
-              <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t border-slate-100">
+      <div className="px-3 py-4 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all duration-200 cursor-pointer"
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-300 hover:text-white hover:bg-rose-500/25 border border-transparent hover:border-rose-400/30 transition-all duration-200 cursor-pointer"
         >
           <LogOut className="h-[18px] w-[18px] shrink-0" />
-          <span>Keluar</span>
+          <span>Keluar Sistem</span>
         </button>
       </div>
     </div>

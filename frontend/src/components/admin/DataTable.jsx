@@ -108,14 +108,14 @@ export default function DataTable({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/50">
-                <th className="px-4 py-3 text-left text-[9px] font-bold text-slate-400 uppercase tracking-widest w-12">
+              <tr className="border-b border-blue-100 bg-[#00478f]/5 text-[#003366]">
+                <th className="px-4 py-3 text-left text-[10px] font-extrabold uppercase tracking-wider w-12">
                   #
                 </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 py-3 text-left text-[9px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-700 transition-colors"
+                    className="px-4 py-3 text-left text-[10px] font-extrabold uppercase tracking-wider cursor-pointer hover:text-[#00478f] transition-colors"
                     onClick={() => col.sortable !== false && handleSort(col.key)}
                   >
                     <div className="flex items-center gap-1">
@@ -123,14 +123,14 @@ export default function DataTable({
                       {col.sortable !== false && (
                         <ArrowUpDown className={cn(
                           'h-3 w-3 transition-colors',
-                          sortKey === col.key ? 'text-primary' : 'text-slate-400'
+                          sortKey === col.key ? 'text-[#00478f]' : 'text-slate-400'
                         )} />
                       )}
                     </div>
                   </th>
                 ))}
                 {(onEdit || onDelete) && (
-                  <th className="px-4 py-3 text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest w-28">
+                  <th className="px-4 py-3 text-center text-[10px] font-extrabold uppercase tracking-wider w-28">
                     Aksi
                   </th>
                 )}

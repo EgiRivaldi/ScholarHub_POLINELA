@@ -85,7 +85,13 @@ const requireRole = (...allowedRoles) => {
   };
 };
 
-const requireAdminUtama = requireRole('admin_utama');
+// Single unified admin role: any authenticated admin has full access to all management modules
+const requireAdminUtama = (req, res, next) => {
+  if (!req.admin) {
+    return errorResponse(res, 'Akses tidak diizinkan. Silakan login terlebih dahulu.', [], 401);
+  }
+  next();
+};
 
 module.exports = {
   isAuthenticated,

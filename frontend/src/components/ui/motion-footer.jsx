@@ -221,7 +221,7 @@ const MarqueeItem = () => (
   <div className="flex items-center space-x-10 px-6 shrink-0">
     <span className="flex items-center gap-2 font-extrabold text-white">
       <img src="/images/polinela-logo.png" alt="POLINELA" className="h-4 w-4 object-contain" />
-      SCHOLARHUB POLINELA
+      SISTEM INFORMASI BEASISWA POLINELA
     </span>
     <span className="text-primary font-bold">✦</span>
     <span>PORTAL BEASISWA RESMI</span>
@@ -300,7 +300,7 @@ export function CinematicFooter({ settings = {} }) {
   };
 
   const currentYear = new Date().getFullYear();
-  const campusName = settings.nama_situs || "ScholarHub POLINELA";
+  const campusName = settings.nama_situs || "Sistem Informasi Beasiswa POLINELA";
   const copyrightText = settings.teks_footer || "Politeknik Negeri Lampung";
 
   return (

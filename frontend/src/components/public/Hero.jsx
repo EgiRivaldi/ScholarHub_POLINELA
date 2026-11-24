@@ -1,182 +1,210 @@
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, GraduationCap, Building2, Layers, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
-import MagneticButton from '@/components/ui/MagneticButton';
+import { Search, RotateCcw, GraduationCap } from 'lucide-react';
+import ScholarshipGrid from '@/components/public/ScholarshipGrid';
+import AnnouncementSidebar from '@/components/public/AnnouncementSidebar';
+import CategoryCard from '@/components/public/CategoryCard';
 
-export default function Hero({ searchQuery, setSearchQuery, stats = {}, settings = {} }) {
-  const navigate = useNavigate();
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    const target = document.getElementById('scholarships');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
+export default function Hero({
+  searchQuery,
+  setSearchQuery,
+  selectedStatus = 'semua',
+  setSelectedStatus,
+  sortOption = 'terbaru',
+  setSortOption,
+  selectedCategory,
+  setSelectedCategory,
+  categories = [],
+  scholarships = [],
+  announcements = [],
+  loading = false,
+  isFiltering = false,
+  onResetFilters,
+}) {
+  const handleCategoryToggle = (category) => {
+    setSelectedCategory?.((prev) => (prev?.id === category.id ? null : category));
   };
-
-  const handleTagClick = (tag) => {
-    setSearchQuery?.(tag);
-    const target = document.getElementById('scholarships');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const quickTags = [
-    'KIP Kuliah',
-    'Bank Indonesia',
-    'Djarum Plus',
-    'Prestasi Akademik',
-    'Pemerintah',
-  ];
 
   return (
-    <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28 text-white min-h-[580px] sm:min-h-[640px] flex items-center justify-center">
-      {/* 1. Authentic POLINELA Campus Photo Background */}
-      <div className="absolute inset-0 z-0">
+    <section
+      id="scholarships"
+      className="relative overflow-hidden pt-24 pb-16 sm:pt-28 sm:pb-24 min-h-[580px]"
+    >
+      {/* 1. Authentic POLINELA Campus Photo Background (Clear Building View with Soft Blue Tint) */}
+      <div className="absolute inset-x-0 top-0 h-[400px] sm:h-[440px] z-0 overflow-hidden bg-slate-900">
         <img
           src="/images/polinela-campus.jpg"
           alt="Gedung Kampus Politeknik Negeri Lampung"
-          className="w-full h-full object-cover object-center scale-105 transform motion-safe:animate-pulse"
-          style={{ animationDuration: '16s' }}
+          className="w-full h-full object-cover object-center"
         />
-        {/* Multilayered Cinematic Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-900/90 to-slate-950/98 backdrop-blur-[2px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(109,40,217,0.4)_0%,transparent_65%)]" />
-        <div className="footer-bg-grid absolute inset-0 opacity-25 pointer-events-none" />
+        {/* Soft Translucent Navy Overlay so the Campus Building is Clearly Visible */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#002b5c]/60 via-[#003875]/55 to-slate-50" />
       </div>
 
-      {/* 2. Main Hero Content */}
-      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 w-full text-center flex flex-col items-center">
+      {/* 2. Main Hero Content: 2-Column Layout (Daftar Beasiswa Kiri + Pengumuman Kanan) */}
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="flex flex-col items-center w-full"
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="space-y-6"
         >
-          {/* Official POLINELA Badge */}
-          <div className="inline-flex items-center gap-2.5 sm:gap-3 px-4 sm:px-5 py-2 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-bold mb-6 backdrop-blur-md shadow-lg transition-all">
-            <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 shadow-xs">
-              <img
-                src="/images/polinela-logo.png"
-                alt="Logo POLINELA"
-                className="h-full w-full object-contain"
-              />
-            </div>
-            <span className="tracking-wide text-slate-100 font-extrabold uppercase text-[11px] sm:text-xs">
-              Politeknik Negeri Lampung • Portal Beasiswa Resmi
-            </span>
-          </div>
-
-          {/* Majestic Campus Heading */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.18] tracking-tight max-w-4xl mb-5 text-balance">
-            {settings.judul_beranda ? (
-              <span>{settings.judul_beranda}</span>
-            ) : (
-              <span>
-                Gerbang Informasi Beasiswa Resmi{' '}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-purple-200 to-emerald-300">
-                  Politeknik Negeri Lampung
-                </span>
-              </span>
-            )}
-          </h1>
-
-          {/* Subtitle with High-contrast readable prose */}
-          <p className="text-sm sm:text-base lg:text-lg text-slate-200/95 leading-relaxed max-w-2xl mb-8 font-normal text-balance">
-            {settings.deskripsi_beranda ||
-              'Akses terpadu seluruh program beasiswa prestasi, bantuan UKT, dan kemitraan industri. Seluruh syarat dan jadwal resmi disajikan secara terbuka tanpa perlu login.'}
-          </p>
-
-          {/* Interactive Floating Search Form */}
-          <div className="w-full max-w-2xl mb-5">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative flex items-center rounded-full bg-white/10 backdrop-blur-xl border border-white/25 p-1.5 sm:p-2 shadow-2xl focus-within:border-purple-300 focus-within:bg-white/15 transition-all"
-            >
-              <div className="pl-3 sm:pl-4 flex items-center pointer-events-none text-slate-300">
-                <Search className="h-5 w-5 text-purple-300" />
+          {/* Hero Heading — Clean Official White & Blue Typography */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-bold mb-4 shadow-xs">
+              <div className="h-5 w-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0">
+                <img
+                  src="/images/polinela-logo.png"
+                  alt="Logo POLINELA"
+                  className="h-full w-full object-contain"
+                />
               </div>
-              <input
-                type="text"
-                value={searchQuery || ''}
-                onChange={(e) => setSearchQuery?.(e.target.value)}
-                placeholder="Cari beasiswa berdasarkan nama, mitra, atau syarat..."
-                className="w-full h-11 sm:h-12 px-3 sm:px-4 bg-transparent text-white placeholder:text-slate-300/80 text-xs sm:text-sm font-medium focus:outline-none"
-              />
-              <MagneticButton
-                as="button"
-                type="submit"
-                strength={0.3}
-                className="h-10 sm:h-11 px-5 sm:px-7 rounded-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary-light hover:to-purple-500 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <span>Cari</span>
-                <ArrowRight className="h-3.5 w-3.5 hidden sm:inline" />
-              </MagneticButton>
-            </form>
+              <span className="tracking-wide text-white font-extrabold uppercase text-[11px]">
+                Politeknik Negeri Lampung • Portal Beasiswa Resmi
+              </span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight max-w-3xl">
+              Daftar Program Beasiswa
+            </h1>
+            <p className="text-xs sm:text-sm lg:text-base text-blue-100 mt-2.5 max-w-2xl font-normal">
+              Daftar lengkap program beasiswa yang tersedia bagi mahasiswa Politeknik Negeri Lampung beserta pengumuman resmi terbaru.
+            </p>
           </div>
 
-          {/* Quick Filter Topic Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-10 max-w-xl">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-              Topik Populer:
-            </span>
-            {quickTags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => handleTagClick(tag)}
-                className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 transition-all cursor-pointer backdrop-blur-sm"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
+          {/* Layout 2 Kolom: Kiri (Daftar Program Beasiswa) & Kanan (Sidebar Pengumuman ala polinela.ac.id) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            {/* Kolom Kiri (8 kolom): Filter & Daftar Kartu Program Beasiswa */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* Filter & Control Bar */}
+              <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 text-slate-900">
+                {/* Header Tab ala POLINELA */}
+                <div className="border-b-2 border-[#00478f] pb-0 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                  <div className="inline-flex items-center gap-2 bg-[#00478f] text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider px-4 py-2 self-start">
+                    <GraduationCap className="h-4 w-4" />
+                    <span>DAFTAR PROGRAM BEASISWA</span>
+                    <span className="ml-1 px-2 py-0.5 rounded-full bg-white/20 text-[11px]">
+                      {scholarships.length}
+                    </span>
+                  </div>
 
-          {/* Fast Metric Stats (Glass Cards) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl pt-2">
-            <div className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-              <span className="text-2xl sm:text-3xl font-black text-white">
-                {stats.scholarshipsCount || 0}+
-              </span>
-              <span className="text-[11px] font-semibold text-slate-300 mt-1 uppercase tracking-wider">
-                Program Beasiswa
-              </span>
+                  {/* Status Filter Pills */}
+                  <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 mb-2">
+                    {[
+                      { id: 'semua', label: 'Semua' },
+                      { id: 'dibuka', label: 'Dibuka' },
+                      { id: 'belum_dibuka', label: 'Segera' },
+                      { id: 'ditutup', label: 'Ditutup' },
+                    ].map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSelectedStatus?.(s.id)}
+                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                          selectedStatus === s.id
+                            ? 'bg-[#00478f] text-white shadow-2xs'
+                            : 'text-slate-600 hover:text-[#00478f] hover:bg-white'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Category Glass Orb Icons inside Control Bar */}
+                {categories.length > 0 && (
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Pilih Kategori Beasiswa:
+                      </span>
+                      {selectedCategory && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCategory?.(null)}
+                          className="text-xs font-bold text-[#00478f] hover:underline cursor-pointer"
+                        >
+                          Tampilkan Semua Kategori ✕
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+                      {categories.map((cat) => (
+                        <CategoryCard
+                          key={cat.id}
+                          category={cat}
+                          isSelected={selectedCategory?.id === cat.id}
+                          onClick={handleCategoryToggle}
+                          compact
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-controls: Search & Sort */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      value={searchQuery || ''}
+                      onChange={(e) => setSearchQuery?.(e.target.value)}
+                      placeholder="Cari nama beasiswa, mitra, atau syarat..."
+                      className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00478f]/20 focus:border-[#00478f]"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <span className="text-xs text-slate-500 font-medium hidden sm:inline">Urutkan:</span>
+                    <select
+                      value={sortOption}
+                      onChange={(e) => setSortOption?.(e.target.value)}
+                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#00478f]/20 focus:border-[#00478f] cursor-pointer w-full sm:w-auto"
+                    >
+                      <option value="terbaru">Terbaru Ditambahkan</option>
+                      <option value="deadline">Batas Waktu Terdekat</option>
+                      <option value="az">Nama Beasiswa (A-Z)</option>
+                    </select>
+
+                    {isFiltering && (
+                      <button
+                        onClick={onResetFilters}
+                        className="inline-flex items-center gap-1 h-9 px-3 rounded-lg border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer shrink-0"
+                        title="Reset Filter"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Reset</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Scholarships Grid Cards (2 Columns inside Left 8-col area) */}
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {[1, 2, 3, 4].map((n) => (
+                    <div key={n} className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 animate-pulse">
+                      <div className="h-16 w-16 bg-slate-100 rounded-2xl" />
+                      <div className="h-4 bg-slate-100 rounded w-1/3" />
+                      <div className="h-5 bg-slate-100 rounded w-4/5" />
+                      <div className="h-4 bg-slate-100 rounded w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ScholarshipGrid scholarships={scholarships} columns={2} />
+              )}
             </div>
 
-            <div className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-              <span className="text-2xl sm:text-3xl font-black text-white">
-                {stats.providersCount || 0}+
-              </span>
-              <span className="text-[11px] font-semibold text-slate-300 mt-1 uppercase tracking-wider">
-                Mitra Resmi
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-              <span className="text-2xl sm:text-3xl font-black text-white">
-                {stats.categoriesCount || 0}
-              </span>
-              <span className="text-[11px] font-semibold text-slate-300 mt-1 uppercase tracking-wider">
-                Kategori Program
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-              <span className="text-2xl sm:text-3xl font-black text-emerald-400 flex items-center gap-1">
-                <ShieldCheck className="h-6 w-6" />
-                100%
-              </span>
-              <span className="text-[11px] font-semibold text-slate-300 mt-1 uppercase tracking-wider">
-                Akses Terbuka
-              </span>
+            {/* Kolom Kanan (4 kolom): Sidebar PENGUMUMAN ala polinela.ac.id */}
+            <div className="lg:col-span-4 lg:sticky lg:top-24">
+              <AnnouncementSidebar announcements={announcements} loading={loading} />
             </div>
           </div>
         </motion.div>
       </div>
-
-      {/* Bottom gradient fade into page content */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none z-10" />
     </section>
   );
 }

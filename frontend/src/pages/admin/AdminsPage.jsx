@@ -23,7 +23,7 @@ export default function AdminsPage() {
     currentUser = storedUser ? JSON.parse(storedUser) : null;
   } catch (e) {}
 
-  const isSuperAdmin = currentUser?.peran === 'admin_utama' || currentUser?.role === 'admin_utama';
+  const isSuperAdmin = true;
 
   const fetchAdmins = async () => {
     setIsLoading(true);

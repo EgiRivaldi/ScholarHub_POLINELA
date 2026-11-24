@@ -1,169 +1,215 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Target,
-  Eye,
-  Users,
-  School,
-  Sparkles,
   GraduationCap,
-  Search,
   Globe,
+  ClipboardCheck,
   CheckCircle2,
+  BookOpen,
 } from 'lucide-react';
 import AnimatedBackground from '@/components/public/AnimatedBackground';
 import { getPublicSettings } from '@/services/api';
 
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-50px' },
-  transition: { duration: 0.4 },
-};
-
 export default function AboutPage() {
   const [settings, setSettings] = useState({});
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
+    // Splash screen transition timer when entering "Tentang"
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 950);
+
     getPublicSettings()
       .then((data) => setSettings(data || {}))
       .catch((err) => console.error('Failed to load settings in about page:', err));
+
+    return () => clearTimeout(timer);
   }, []);
+
+  const steps = [
+    {
+      num: '1',
+      title: 'Pilih Kategori atau Cari Kata Kunci',
+      desc: 'Gunakan filter kategori beasiswa di halaman beranda atau kotak pencarian untuk menemukan program beasiswa yang relevan dengan profil Anda.',
+    },
+    {
+      num: '2',
+      title: 'Pelajari Detail & Syarat Pendaftaran',
+      desc: 'Buka halaman detail beasiswa untuk membaca deskripsi lengkap, batas tanggal penutupan, dan daftar persyaratan yang wajib dipenuhi.',
+    },
+    {
+      num: '3',
+      title: 'Siapkan Berkas & Buka Website Resmi',
+      desc: 'Klik tombol "Kunjungi Situs Pendaftaran Resmi" untuk diarahkan langsung ke sistem pendaftaran resmi milik mitra atau kementerian penyelenggara beasiswa.',
+    },
+  ];
+
   return (
-    <div className="relative py-12 sm:py-16 min-h-screen">
+    <div className="relative py-10 sm:py-14 min-h-screen bg-slate-50 text-slate-900">
       <AnimatedBackground />
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div {...fadeUp} className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 text-primary text-xs font-bold uppercase tracking-wider mb-6 shadow-sm border border-primary-100">
-            <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-            Tentang Kami
-          </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-tight mb-6">
-            Apa itu{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light">ScholarHub</span>{' '}
-            POLINELA?
-          </h1>
-          <p className="text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            {settings.tentang_website ||
-              'ScholarHub POLINELA adalah platform basis data beasiswa terpusat yang dirancang untuk membantu mahasiswa di Politeknik Negeri Lampung menjelajahi, membandingkan, dan memeriksa matriks persyaratan beasiswa dalam satu wadah.'}
-          </p>
-        </motion.div>
 
-        {/* Features */}
-        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-20">
-          {[
-            { icon: Search, title: 'Pencarian Mudah', desc: 'Temukan beasiswa dengan cepat menggunakan pencarian dan filter yang canggih.' },
-            { icon: GraduationCap, title: 'Informasi Lengkap', desc: 'Dapatkan persyaratan lengkap dan kriteria kelayakan yang mendetail.' },
-            { icon: Globe, title: 'Akses Langsung', desc: 'Tautan langsung ke situs web resmi penyelenggara beasiswa.' },
-            { icon: Users, title: 'Fokus Mahasiswa', desc: 'Dibangun secara khusus untuk seluruh mahasiswa POLINELA.' },
-          ].map((feature, index) => (
+      {/* 1. SPLASH SCREEN TRANSITION OVERLAY WHEN ENTERING "TENTANG" */}
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            key="about-splash"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.03 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+            className="fixed inset-0 z-50 bg-white/96 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 select-none"
+          >
             <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: index * 0.08 }}
-              className="flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-slate-200/80 hover:border-primary/40 shadow-xs transition-all"
+              initial={{ opacity: 0, scale: 0.9, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              className="relative flex flex-col items-center"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 mb-4 shadow-sm">
-                <feature.icon className="h-5.5 w-5.5 text-primary" />
+              {/* Soft Blue Ambient Glow Behind Logo */}
+              <div className="absolute -inset-10 bg-blue-100/70 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="relative h-24 w-24 sm:h-28 sm:w-28 mb-4 flex items-center justify-center">
+                <img
+                  src={settings.url_logo || '/images/polinela-logo.png'}
+                  alt="Logo Politeknik Negeri Lampung"
+                  className="h-full w-full object-contain drop-shadow-sm"
+                />
               </div>
-              <h3 className="text-sm font-bold text-slate-800 mb-2">{feature.title}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed font-medium">{feature.desc}</p>
+
+              <h2 className="relative text-base sm:text-lg font-black tracking-wider text-[#00478f] uppercase">
+                POLITEKNIK NEGERI LAMPUNG
+              </h2>
+              <p className="relative text-xs font-bold tracking-[0.2em] text-slate-400 uppercase mt-1">
+                SISTEM INFORMASI BEASISWA
+              </p>
+
+              {/* Animated Progress Bar */}
+              <div className="relative w-44 h-1 bg-slate-200 rounded-full overflow-hidden mt-4">
+                <motion.div
+                  initial={{ width: '0%' }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 0.85, ease: 'easeOut' }}
+                  className="h-full bg-[#00478f] rounded-full"
+                />
+              </div>
             </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Mission & Vision */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
-          <motion.div
-            {...fadeUp}
-            className="p-8 rounded-3xl bg-slate-900 text-white shadow-xl border border-slate-800"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 mb-5 shadow-inner">
-              <Target className="h-6 w-6 text-primary-light" />
-            </div>
-            <h2 className="text-xl font-bold mb-3 tracking-tight">Misi Kami</h2>
-            <p className="text-sm text-slate-300 leading-relaxed font-medium">
-              Menyediakan platform informasi beasiswa yang terpusat, mudah diakses, dan mutakhir yang memberdayakan mahasiswa Politeknik Negeri Lampung untuk menemukan, membandingkan, dan mendaftar program beasiswa dengan efisien.
-            </p>
           </motion.div>
+        )}
+      </AnimatePresence>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="p-8 rounded-3xl bg-gradient-to-br from-primary to-primary-light text-white shadow-xl border border-primary/10"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/25 mb-5 shadow-inner">
-              <Eye className="h-6 w-6 text-white" />
-            </div>
-            <h2 className="text-xl font-bold mb-3 tracking-tight">Visi Kami</h2>
-            <p className="text-sm text-white/90 leading-relaxed font-medium">
-              Menjadi pusat informasi beasiswa terdepan bagi mahasiswa politeknik di Indonesia, menjembatani kesenjangan antara mahasiswa dan penyedia beasiswa melalui teknologi dan inovasi.
-            </p>
-          </motion.div>
+      {/* 2. MAIN ABOUT PAGE CONTENT */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: showSplash ? 0 : 1, y: showSplash ? 16 : 0 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
+        className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-7"
+      >
+        {/* Top Header */}
+        <div className="text-center space-y-2 pb-2">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#00478f] text-xs font-extrabold uppercase tracking-wider border border-blue-200 shadow-2xs">
+            <GraduationCap className="h-4 w-4 text-[#00478f]" />
+            <span>TENTANG SISTEM</span>
+          </span>
+          <h1 className="text-2xl sm:text-4xl font-black text-[#003366] tracking-tight uppercase pt-1">
+            SISTEM INFORMASI BEASISWA
+          </h1>
+          <p className="text-sm sm:text-base text-slate-500 font-medium">
+            Politeknik Negeri Lampung
+          </p>
         </div>
 
-        {/* Benefits */}
-        <motion.div {...fadeUp} className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 text-center mb-10 tracking-tight">
-            Manfaat Utama
-          </h2>
+        {/* Card 1: PROFIL SISTEM INFORMASI BEASISWA */}
+        <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+          <div className="border-b-2 border-[#00478f] mb-5">
+            <span className="inline-flex items-center gap-2 bg-[#00478f] text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider px-4 py-2">
+              <BookOpen className="h-4 w-4" />
+              <span>PROFIL SISTEM INFORMASI BEASISWA</span>
+            </span>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* For Students */}
-            <div className="p-6 sm:p-8 rounded-3xl glass-ios border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.01)] hover:border-white/20 transition-colors">
-              <div className="flex items-center gap-3.5 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-lg font-bold text-text tracking-tight">Untuk Mahasiswa</h3>
+          <div className="space-y-4 text-sm sm:text-[15px] text-slate-600 leading-relaxed">
+            <p>
+              <strong className="font-bold text-slate-900">
+                Sistem Informasi Beasiswa Politeknik Negeri Lampung
+              </strong>{' '}
+              {settings.tentang_website
+                ? settings.tentang_website.replace(/ScholarHub POLINELA/gi, '').replace(/^adalah\s*/i, 'adalah ')
+                : 'adalah portal informasi terpadu yang dirancang untuk memfasilitasi mahasiswa POLINELA dalam memperoleh informasi valid, akurat, dan mutakhir mengenai berbagai program beasiswa pendidikan tinggi.'}
+            </p>
+            <p>
+              Portal ini menghimpun beasiswa dari berbagai kategori, meliputi beasiswa pemerintah (seperti KIP Kuliah Merdeka dan Bank Indonesia), beasiswa kemitraan swasta dan yayasan (seperti Djarum Beasiswa Plus), beasiswa internal Politeknik Negeri Lampung, hingga beasiswa BUMN dan internasional.
+            </p>
+          </div>
+        </section>
+
+        {/* Card 2: 2-Column Highlight Cards (Tujuan & Transparansi) */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between hover:border-[#00478f]/50 transition-colors">
+            <div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-[#00478f] border border-blue-100 mb-4">
+                <Globe className="h-5 w-5" />
               </div>
-              <ul className="space-y-3.5">
-                {[
-                  'Mengakses seluruh informasi beasiswa dalam satu tempat',
-                  'Menyaring beasiswa berdasarkan kategori dan penyedia',
-                  'Melihat persyaratan detail dan batas waktu',
-                  'Tautan langsung ke halaman pendaftaran resmi',
-                  'Tetap mendapatkan info mutakhir peluang beasiswa baru',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-600 font-medium">{item}</span>
-                  </li>
-                ))}
-              </ul>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-800 mb-2">
+                Pemerataan Akses Informasi
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Memastikan seluruh mahasiswa dari berbagai jurusan dan jenjang (D2, D3, Sarjana Terapan) memiliki akses informasi yang setara dan terbuka tanpa perlu login.
+              </p>
             </div>
-
-            {/* For University */}
-            <div className="p-6 sm:p-8 rounded-3xl glass-ios border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.01)] hover:border-white/20 transition-colors">
-              <div className="flex items-center gap-3.5 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-50">
-                  <School className="h-5 w-5 text-secondary-dark" />
-                </div>
-                <h3 className="text-lg font-bold text-text tracking-tight">Untuk Universitas</h3>
-              </div>
-              <ul className="space-y-3.5">
-                {[
-                  'Pengelolaan data beasiswa secara terpusat',
-                  'Distribusi informasi yang efisien kepada mahasiswa',
-                  'Meningkatnya partisipasi mahasiswa dalam program beasiswa',
-                  'Pelacakan peluang beasiswa yang tersedia dengan lebih baik',
-                  'Citra universitas yang profesional dan modern',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-600 font-medium">{item}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs font-bold text-[#00478f]">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <span>Terbuka untuk Seluruh Mahasiswa POLINELA</span>
             </div>
           </div>
-        </motion.div>
-      </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between hover:border-[#00478f]/50 transition-colors">
+            <div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-[#00478f] border border-blue-100 mb-4">
+                <ClipboardCheck className="h-5 w-5" />
+              </div>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-800 mb-2">
+                Kejelasan Matriks Persyaratan
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Rincian persyaratan akademik, administrasi, dan umum dicantumkan secara gamblang agar mahasiswa dapat mempersiapkan berkas lebih awal sebelum tenggat waktu.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs font-bold text-[#00478f]">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <span>Terverifikasi oleh Pengelola Beasiswa</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Card 3: ALUR MEMANFAATKAN PORTAL */}
+        <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+          <div className="border-b-2 border-[#00478f] mb-6">
+            <span className="inline-block bg-[#00478f] text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider px-4 py-2">
+              ALUR MEMANFAATKAN PORTAL
+            </span>
+          </div>
+
+          <div className="space-y-6">
+            {steps.map((step) => (
+              <div key={step.num} className="flex items-start gap-4">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00478f] text-white text-xs sm:text-sm font-extrabold shrink-0 mt-0.5 shadow-2xs">
+                  {step.num}
+                </span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800">
+                    {step.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+                    {step.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </motion.div>
     </div>
   );
 }

@@ -70,15 +70,15 @@ export default function AnnouncementTicker() {
 
   return (
     <div
-      className="relative z-40 bg-gradient-to-r from-violet-700 via-purple-700 to-indigo-800 text-white text-xs py-2 shadow-sm border-b border-white/10 overflow-hidden select-none"
+      className="relative z-40 bg-[#003366] text-white text-xs py-2 shadow-xs border-b border-white/15 overflow-hidden select-none"
       role="region"
       aria-label="Pengumuman Berjalan"
     >
       <div className="flex items-center w-full">
         {/* Left Fixed Badge */}
-        <div className="flex items-center gap-2 pl-4 pr-3 py-0.5 bg-gradient-to-r from-violet-800 to-transparent z-20 shrink-0">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-[11px] font-bold tracking-wider uppercase shadow-xs border border-white/20">
-            <Megaphone className="h-3 w-3 text-amber-300 animate-pulse" />
+        <div className="flex items-center gap-2 pl-4 pr-3 py-0.5 bg-[#003366] z-20 shrink-0 border-r border-white/15">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#15803d] text-white text-[11px] font-extrabold tracking-wider uppercase shadow-2xs">
+            <Megaphone className="h-3 w-3 text-white" />
             <span>Pengumuman</span>
           </span>
         </div>
@@ -98,13 +98,14 @@ export default function AnnouncementTicker() {
         </div>
 
         {/* Right Close Button */}
-        <div className="pr-4 pl-3 py-0.5 bg-gradient-to-l from-indigo-900 to-transparent z-20 shrink-0">
+        <div className="pr-3.5 pl-2.5 py-0.5 bg-[#003366] z-20 shrink-0 border-l border-white/15">
           <button
             onClick={() => setIsDismissed(true)}
-            className="p-1 rounded-md text-white/70 hover:text-white hover:bg-white/15 transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-white/90 hover:text-white bg-white/10 hover:bg-rose-600 transition-colors cursor-pointer font-bold text-[11px]"
             title="Tutup pengumuman"
             aria-label="Tutup pengumuman"
           >
+            <span className="hidden sm:inline">Tutup</span>
             <X className="h-3.5 w-3.5" />
           </button>
         </div>

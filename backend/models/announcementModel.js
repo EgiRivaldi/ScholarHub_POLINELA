@@ -43,8 +43,12 @@ const Announcement = {
         p.judul,
         p.isi_pengumuman,
         p.url_tujuan,
-        p.urutan_tampil
+        p.urutan_tampil,
+        p.mulai_tayang,
+        p.dibuat_pada,
+        u_buat.nama_lengkap AS pembuat_nama
       FROM pengumuman p
+      LEFT JOIN pengguna u_buat ON u_buat.id = p.dibuat_oleh
       WHERE p.aktif = 1
         AND (p.mulai_tayang IS NULL OR p.mulai_tayang <= NOW())
         AND (p.akhir_tayang IS NULL OR p.akhir_tayang >= NOW())
